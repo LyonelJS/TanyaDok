@@ -45,7 +45,12 @@ li {
     margin-left: 3%;
 }
 
-
+#profile {
+  height: fit-content;
+  width: 3vw;
+  margin: 5% 0 0 50%;
+  float: right;
+}
 #header {
     width: 100%;
     position: relative; }
