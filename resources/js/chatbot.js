@@ -1,4 +1,4 @@
-const API_KEY = 'AIzaSyBAzKJLyNO5Fbu86aMt2MbYOHNZWZQXbIk'
+const API_KEY = 'AIzaSyCNdQZHu1NjD2la4W_hYCmp71fTXj9zE4Y'
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`
 
 let promptInput = document.querySelector('input[name="prompt"]');
@@ -77,10 +77,10 @@ document.addEventListener('mousemove', (e) => {
 
     // Change the buttons to images when maxWidth is reached
     newChatButton.innerHTML = ''; // Clear existing text
-    newChatButton.innerHTML = '<img src="newChatButton.png" alt="New Chat" style="width: 50%; height: auto;">';
+    newChatButton.innerHTML = '<img src="resources/images/newChatButton.png" alt="New Chat" style="width: 50%; height: auto;">';
 
     clearHistoryButton.innerHTML = ''; // Clear existing text
-    clearHistoryButton.innerHTML = '<img src="deleteChatButton.png" alt="Clear History" style="width: 50%; height: auto;">';
+    clearHistoryButton.innerHTML = '<img src="resources/images/deleteChatButton.png" alt="Clear History" style="width: 50%; height: auto;">';
   } else { // Change back to text if less than maxWidth
     newChatButton.innerHTML = 'New Chat'; 
 
