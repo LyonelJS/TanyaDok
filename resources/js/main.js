@@ -3,6 +3,7 @@
 	"use strict";
 
 	document.addEventListener('DOMContentLoaded', function(){
+        
     var today = new Date(),
         year = today.getFullYear(),
         month = today.getMonth(),
@@ -169,20 +170,6 @@
 })(jQuery);
 
         document.addEventListener("DOMContentLoaded", function () {
-            function scroll() {
-                const main = document.getElementById('main-dashboard');
-                const side = document.getElementById('side-dashboard');
-
-                main.addEventListener('wheel', (event) => {
-                    event.preventDefault();
-                    main.scrollTop += event.deltaY;
-                });
-
-                side.addEventListener('wheel', (event) => {
-                    event.preventDefault();
-                    side.scrollTop += event.deltaY;
-                });
-            }
             const xValues = ["mon", "tues", "wed", "thurs", "fri", "sat", "sun"];
             const yValues = [89, 85, 91, 95, 95, 94, 84, 89, 88, 90, 90];
 
@@ -199,36 +186,170 @@
                 },
                 options: {}
             });
-            let items = document.querySelectorAll('.carousel .carousel-item')
 
-
-            items.forEach((el) => {
-                const minPerSlide = 4
-                let next = el.nextElementSibling
-                for (var i = 1; i < minPerSlide; i++) {
-                    if (!next) {
-                        // wrap carousel by using first child
-                        next = items[0]
-                    }
-                    let cloneChild = next.cloneNode(true)
-                    el.appendChild(cloneChild.children[0])
-                    next = next.nextElementSibling
-                }
-            })
-
-            document.querySelector('.carousel-control-next').addEventListener('click', function () {
-                // console.log("Next button clicked");
-                $('#recipeCarousel').carousel('next');  // Triggers next slide
-            });
-
-            document.querySelector('.carousel-control-prev').addEventListener('click', function () {
-                $('#recipeCarousel').carousel('prev');  // Triggers previous slide
-            });
-        })
-
-        function refreshCarousel() {
-            $('#recipeCarousel').carousel();
+// Function to get a cookie by its name
+function getCookie(name) {
+    if (document.cookie.length) {
+        var arrCookie = document.cookie.split(';'),
+            nameEQ = name + "=";
+        for (var i = 0, cLen = arrCookie.length; i < cLen; i++) {
+            var c = arrCookie[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1, c.length);  // Trim whitespace
+            }
+            if (c.indexOf(nameEQ) === 0) {
+                return new Date(c.substring(nameEQ.length, c.length)); // Return the selected date
+            }
         }
-        window.addEventListener('click', refreshCarousel)
+    }
+    return null; // Return null if the cookie is not found
+}
+// Retrieve the selected date from the cookie
+let dateString = getCurrentDateString();
+function getCurrentDateString(selectedDate) {
+    const date = selectedDate || new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // Months are 0-indexed
+    const day = date.getDate();
+    return `${day}-${month}-${year}`;
+}
+
+document.addEventListener("click", function () {
+    dateString = getCurrentDateString(getCookie('selected_day'))
+    
+    editSlideContent("-1", "none", dateString);
+});
+
+let healthData = {
+    "5-12-2024": {
+      "0": "90",
+      "1": "72",
+      "2": "5000",
+      "3": "100",
+      "4": "10"
+    },
+    "6-12-2024": {
+      "0": "92",
+      "1": "74",
+      "2": "3000",
+      "3": "1200",
+      "4": "9"
+    }
+  };
+
+  getCurrentDateString(new Date());
+// Function to enhance carousel by cloning slides
+const enhanceCloningLogic = () => {
+    const items = document.querySelectorAll('#recipeCarousel .carousel-item');
+
+    items.forEach((el) => {
+        const minPerSlide = 4;
+        let next = el.nextElementSibling;
+        
+        // Loop to create additional clones
+        for (let i = 1; i < minPerSlide; i++) {
+            if (!next) {
+                // Wrap carousel by using the first child (creating a loop)
+                next = items[0];
+            }
+
+            // Clone the next sibling
+            let cloneChild = next.cloneNode(true); // Clone the next sibling slide
+            cloneChild.classList.remove('active'); // Remove the active class from the cloned slide
+
+            // Insert the cloned slide correctly by appending its child
+            el.appendChild(cloneChild.children[0]); // Append only the child content
+            
+            next = next.nextElementSibling; // Move to the next sibling
+        }
+    });
+
+    // After cloning, sync the text content from the data structure to the slides
+    updateSlideContent(dateString); // Ensure initial content is set for all slides, including inactive ones
+};
+
+// Function to update the content on all slides (including inactive ones)
+function updateSlideContent(dateString){
+    document.querySelectorAll('.carousel-item').forEach((slide) => {
+        const editableElements = slide.querySelectorAll('.editable'); // Find all editable elements within the slide
+        editableElements.forEach((editableElement) => {
+            const dataid = editableElement.getAttribute('data-id'); // Get the data-id attribute
+            if (healthData[dateString]) {
+                editableElement.innerText = healthData[dateString][dataid]; // Update the text from the dictionary
+            }
+        });
+    });
+};
+// Function to handle the content editing
+function editSlideContent(dataid, newText, dateString){
+    if (healthData[dateString]) {
+        healthData[dateString][dataid] = newText; // Update the text in the dictionary
+        updateSlideContent(dateString); // Apply the update to the slides (including inactive)
+    } else {
+        healthData[dateString] = {
+            "0": "-",
+            "1": "-",
+            "2": "-",
+            "3": "-",
+            "4": "-" 
+        };
+        if (dataid != "-1") {
+            editSlideContent(dataid, newText, dateString);
+        } else {
+            updateSlideContent(dateString)
+        }
+    }
+};
+
+// Function to handle input without resetting the cursor
+const handleInput = (event) => {
+    const editableElement = event.target;
+    const dataid = editableElement.getAttribute('data-id'); // Get the data-id of the edited element
+
+    // Store the current selection or cursor position
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    const cursorPosition = range.startOffset;
+
+    const newText = editableElement.innerText; // Get the new text from the editable element
+    editSlideContent(dataid, newText, dateString); // Update the dictionary
+
+    // Restore the cursor position after the content is updated
+    setTimeout(() => {
+        const element = document.querySelector(`[data-id="${dataid}"]`);
+        if (element) {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.setStart(element.childNodes[0], cursorPosition);
+            range.setEnd(element.childNodes[0], cursorPosition);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }, 0);
+};
+
+// Initialize the carousel by cloning and syncing content
+enhanceCloningLogic();
+
+// Event listener for editing content with cursor position preservation
+document.querySelectorAll('.editable').forEach((editableElement) => {
+    editableElement.addEventListener('input', handleInput);
+});
+
+// Carousel controls (optional, based on your need)
+document.querySelector('.carousel-control-next').addEventListener('click', function () {
+    updateSlideContent(dateString); // Re-sync all slides after moving next
+    $('#recipeCarousel').carousel('next');
+    updateSlideContent(dateString); // Re-sync after moving next
+});
+
+document.querySelector('.carousel-control-prev').addEventListener('click', function () {
+    updateSlideContent(dateString); // Re-sync all slides after moving previous
+    $('#recipeCarousel').carousel('prev');
+    updateSlideContent(dateString); // Re-sync after moving previous
+});
+
+
+        });
 
     
