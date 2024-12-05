@@ -3,6 +3,9 @@
 	"use strict";
 
 	document.addEventListener('DOMContentLoaded', function(){
+
+        // Set the cookie to today's date
+        
         
     var today = new Date(),
         year = today.getFullYear(),
@@ -145,7 +148,7 @@
         }
         document.cookie = name + "=" + selectedDay + expires + "; path=/";
     };
-    
+    document.cookie = "selected_day=" + new Date() + "; path=/";
     Calendar.prototype.getCookie = function(name) {
         if(document.cookie.length){
             var arrCookie  = document.cookie.split(';'),
@@ -170,24 +173,7 @@
 })(jQuery);
 
         document.addEventListener("DOMContentLoaded", function () {
-            const xValues = ["mon", "tues", "wed", "thurs", "fri", "sat", "sun"];
-            const yValues = [89, 85, 91, 95, 95, 94, 84, 89, 88, 90, 90];
-
-            new Chart("myChart", {
-                type: "line",
-                data: {
-                    labels: xValues,
-                    datasets: [{
-                        label: "glucose level",
-                        backgroundColor: "rgba(0,0,255,1.0)",
-                        borderColor: "rgba(0,0,255,0.1)",
-                        data: yValues
-                    }]
-                },
-                options: {}
-            });
-
-// Function to get a cookie by its name
+            // Function to get a cookie by its name
 function getCookie(name) {
     if (document.cookie.length) {
         var arrCookie = document.cookie.split(';'),
@@ -204,8 +190,6 @@ function getCookie(name) {
     }
     return null; // Return null if the cookie is not found
 }
-// Retrieve the selected date from the cookie
-let dateString = getCurrentDateString();
 function getCurrentDateString(selectedDate) {
     const date = selectedDate || new Date();
     const year = date.getFullYear();
@@ -213,14 +197,125 @@ function getCurrentDateString(selectedDate) {
     const day = date.getDate();
     return `${day}-${month}-${year}`;
 }
+// Retrieve the selected date from the cookie
+let dateString = getCurrentDateString(getCookie('selected_day'));
 
-document.addEventListener("click", function () {
-    dateString = getCurrentDateString(getCookie('selected_day'))
+
+
+
+            const xValues = [ "sun", "mon", "tues", "wed", "thurs", "fri", "sat"];
+            let healthvalues0 = [];
+            let healthvalues1 = [];
+            let healthvalues2 = [];
+            let healthvalues3 = [];
+            let healthvalues4 = [];
+
+            myChart = new Chart("myChart", {
+                type: "line",
+                data: {
+                    labels: xValues,
+                    datasets: [
+                        {
+                            label: "blood pressure",
+                            backgroundColor: "rgba(0,0,255,1.0)",
+                            borderColor: "rgba(0,0,255,0.1)",
+                            data: healthvalues0
+                        },
+                        {
+                            label: "heart rate",
+                            backgroundColor: "rgba(0,0,255,1.0)",
+                            borderColor: "rgba(0,0,255,0.1)",
+                            data: healthvalues1
+                        },
+                        {
+                            label: "oxygen levels",
+                            backgroundColor: "rgba(0,0,255,1.0)",
+                            borderColor: "rgba(0,0,255,0.1)",
+                            data: healthvalues2
+                        },
+                        {
+                            label: "glucose levels",
+                            backgroundColor: "rgba(0,0,255,1.0)",
+                            borderColor: "rgba(0,0,255,0.1)",
+                            data: healthvalues3
+                        },
+                        {
+                            label: "respiratory rate",
+                            backgroundColor: "rgba(0,0,255,1.0)",
+                            borderColor: "rgba(0,0,255,0.1)",
+                            data: healthvalues4
+                        },
+                    ]
+                },
+                options: {}
+            });
+
+// Function to get the start of the week (Sunday) for the selected date
+function getStartOfWeek(date) {
+    const dayOfWeek = date.getDay(); // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const diff = date.getDate() - dayOfWeek; // Calculate the difference between the selected date and the previous Sunday
+    const startOfWeek = new Date(date.setDate(diff)); // Set the date to the previous Sunday
+    return startOfWeek;
+}
+function updateGraphForWeek(selectedDate) {
+    let startOfWeek = getStartOfWeek(selectedDate); // Get the start of the week (Sunday)
     
-    editSlideContent("-1", "none", dateString);
-});
+    // Loop through each health metric (blood pressure, heart rate, etc.)
+    for (let j = 0; j < 5; j++) { // 5 health metrics
+        let yValues = []; // Start with an empty array for each dataset
+        let dayString;
+        // Loop through each day of the week, starting from the calculated Sunday
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i); // Set the date for each day of the week
+            dayString = getCurrentDateString(day);
+            // Fetch the data for this day (assuming healthData contains this)
+            if (healthData[dayString] && healthData[dayString][j] != "-") {
+                // Assuming healthData stores values for each day
+                yValues.push(parseInt(healthData[dayString][j])); // Push health metric value for the day
+            } else {
+                yValues.push(null); // No data available for that day
+            }
+        }
+
+        // Update the chart dataset for this metric
+        myChart.data.datasets[j].data = yValues;
+    }
+
+    // Re-render the chart with updated data
+    myChart.update(); 
+}
+
 
 let healthData = {
+    "1-12-2024": {
+        "0": "91",
+        "1": "73",
+        "2": "4500",
+        "3": "110",
+        "4": "8"
+    },
+    "2-12-2024": {
+        "0": "93",
+        "1": "75",
+        "2": "6000",
+        "3": "130",
+        "4": "7"
+    },
+    "3-12-2024": {
+        "0": "94",
+        "1": "76",
+        "2": "3500",
+        "3": "1050",
+        "4": "9"
+    },
+    "4-12-2024": {
+        "0": "95",
+        "1": "77",
+        "2": "4700",
+        "3": "125",
+        "4": "6"
+    },
     "5-12-2024": {
       "0": "90",
       "1": "72",
@@ -234,9 +329,27 @@ let healthData = {
       "2": "3000",
       "3": "1200",
       "4": "9"
+    },
+    "7-12-2024": {
+        "0": "96",
+        "1": "78",
+        "2": "5200",
+        "3": "1100",
+        "4": "8"
+    },
+    "8-12-2024": {
+        "0": "12",
+        "1": "13",
+        "2": "14",
+        "3": "13",
+        "4": "12"
     }
   };
-
+  document.addEventListener("click", function () {
+    dateString = getCurrentDateString(getCookie('selected_day'))
+    
+    editSlideContent("-1", "none", dateString);
+});
   getCurrentDateString(new Date());
 // Function to enhance carousel by cloning slides
 const enhanceCloningLogic = () => {
@@ -267,9 +380,25 @@ const enhanceCloningLogic = () => {
     // After cloning, sync the text content from the data structure to the slides
     updateSlideContent(dateString); // Ensure initial content is set for all slides, including inactive ones
 };
+let isEditing = false; // Track editing state
 
+// Set the editing state on focus
+document.addEventListener("focusin", function (event) {
+    if (event.target.classList.contains("editable")) {
+        isEditing = true; // Editing has started
+    }
+});
+
+// Reset the editing state on focus out
+document.addEventListener("focusout", function (event) {
+    if (event.target.classList.contains("editable")) {
+        isEditing = false; // Editing has stopped
+    }
+editSlideContent(event.target.getAttribute('data-id'), event.target.innerText, dateString); // Update the slide content
+});
 // Function to update the content on all slides (including inactive ones)
 function updateSlideContent(dateString){
+    if (isEditing) return; // Skip updates while editing
     document.querySelectorAll('.carousel-item').forEach((slide) => {
         const editableElements = slide.querySelectorAll('.editable'); // Find all editable elements within the slide
         editableElements.forEach((editableElement) => {
@@ -279,6 +408,7 @@ function updateSlideContent(dateString){
             }
         });
     });
+    updateGraphForWeek(getCookie('selected_day'));
 };
 // Function to handle the content editing
 function editSlideContent(dataid, newText, dateString){
@@ -301,40 +431,10 @@ function editSlideContent(dataid, newText, dateString){
     }
 };
 
-// Function to handle input without resetting the cursor
-const handleInput = (event) => {
-    const editableElement = event.target;
-    const dataid = editableElement.getAttribute('data-id'); // Get the data-id of the edited element
-
-    // Store the current selection or cursor position
-    const selection = window.getSelection();
-    const range = selection.getRangeAt(0);
-    const cursorPosition = range.startOffset;
-
-    const newText = editableElement.innerText; // Get the new text from the editable element
-    editSlideContent(dataid, newText, dateString); // Update the dictionary
-
-    // Restore the cursor position after the content is updated
-    setTimeout(() => {
-        const element = document.querySelector(`[data-id="${dataid}"]`);
-        if (element) {
-            const selection = window.getSelection();
-            const range = document.createRange();
-            range.setStart(element.childNodes[0], cursorPosition);
-            range.setEnd(element.childNodes[0], cursorPosition);
-            selection.removeAllRanges();
-            selection.addRange(range);
-        }
-    }, 0);
-};
 
 // Initialize the carousel by cloning and syncing content
 enhanceCloningLogic();
 
-// Event listener for editing content with cursor position preservation
-document.querySelectorAll('.editable').forEach((editableElement) => {
-    editableElement.addEventListener('input', handleInput);
-});
 
 // Carousel controls (optional, based on your need)
 document.querySelector('.carousel-control-next').addEventListener('click', function () {

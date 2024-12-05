@@ -123,7 +123,7 @@ li {
   .calendar-wrap {
     width: 85%;
     background: #fff;
-    padding: 40px 20px 20px 20px; }
+    padding: 40px 20px 0px 20px; }
     @media (max-width: 767.98px) {
       .calendar-wrap {
         width: 100%; } }
@@ -132,7 +132,7 @@ li {
     width: 100%; }
   
   #calendar tr {
-    height: 4em; }
+    height: 3.5em; }
   
   thead tr {
     color: #000;
