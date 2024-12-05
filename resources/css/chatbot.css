@@ -201,7 +201,68 @@ body {
     border-radius: 10px;
     max-width: 500px;
     word-wrap: break-word;
+    display:flex;
+    flex-direction: column;
 }
+.bot-message:hover .copy {
+    display: block; 
+}
+.copy{
+    width:20px;
+    height:20px;
+    border:none;
+    background-color: #007bff;
+    background-image: url('copyButton.png');
+    background-position: center;
+    background-size: 20px 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+    display:none;
+    position:relative;
+}
+.copy.copied {
+    background: url('check-icon.png') no-repeat center center;
+    background-size: 10px 10px;
+}
+.copy:hover{
+    background-color: #0056b3;
+    content: "Click to copy";
+}
+/* Add caption on hover */
+.copy:hover::after {
+    content: "Click to copy";
+    position: absolute; /* Position relative to .copy */
+    top: 110%; /* Position below the button */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Center adjustment */
+    background-color: #000;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0.8;
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+/* Add caption on hover */
+.copy.copied:hover::after {
+    content: "Copied!";
+    position: absolute; /* Position relative to .copy */
+    top: 110%; /* Position below the button */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Center adjustment */
+    background-color: #000;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0.8;
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+
+
 
 .user-message {
     background-color: #f0f0f0;
