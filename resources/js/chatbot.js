@@ -1,4 +1,4 @@
-const API_KEY = 'AIzaSyCNdQZHu1NjD2la4W_hYCmp71fTXj9zE4Y'
+const API_KEY = 'AIzaSyBAzKJLyNO5Fbu86aMt2MbYOHNZWZQXbIk'
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`
 
 let promptInput = document.querySelector('input[name="prompt"]');
@@ -176,6 +176,36 @@ function startNewChat() {
         const name = msg.sender === 'bot' ? '' : 'You: <br>';
         messageDiv.innerHTML = `<b>${name} </b>` + msg.message;
         chatMessages.appendChild(messageDiv);
+
+        const copyButton = document.createElement('button')
+        if (messageDiv.classList.contains('bot-message')) {
+        copyButton.classList.add('copy')
+
+        messageDiv.append(copyButton);
+
+        copyButton.addEventListener('click', function(){
+          const parentText = this.parentElement.textContent;
+
+          let parentTextFormatted;
+          // Define the word or phrase to remove
+          const wordToRemove = "Dok: ";
+
+          // Remove the specific word or phrase using replace()
+          parentTextFormatted = parentText.replace(wordToRemove, '').trim();
+
+          navigator.clipboard.writeText(parentTextFormatted).then(() => {
+            this.classList.add('copied');
+            
+            setTimeout(() => {
+              this.classList.remove('copied');
+            }, 2000)
+
+          }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        })
+      
+        });
+        }
     });
     // Change color for the active chat in the sidebar (highlight the current chat)
     updateActiveHistoryItem();
@@ -252,6 +282,7 @@ const generateAPIResponse = async () => {
       // Create a container for the bot response
       const botResponseDiv = document.createElement('div');
       botResponseDiv.classList.add('bot-message', 'bot-message-right');
+      
       // Append the container to the output div
       output.appendChild(botResponseDiv);
       // Add the 'Dok: '(sender) text to the container
@@ -285,7 +316,8 @@ const generateAPIResponse = async () => {
 
         // Scroll down
         chatContainer.scrollTop = chatContainer.scrollHeight;
-        
+
+        loadChat(currentChatIndex);
       });
 
       // Scroll to the latest message
