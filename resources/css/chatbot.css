@@ -212,7 +212,7 @@ body {
     height:20px;
     border:none;
     background-color: #007bff;
-    background-image: url('copyButton.png');
+    background-image: url('resources/images/copyButton.png');
     background-position: center;
     background-size: 20px 20px;
     border-radius: 5px;
@@ -221,7 +221,7 @@ body {
     position:relative;
 }
 .copy.copied {
-    background: url('check-icon.png') no-repeat center center;
+    background: url('resources/images/check-icon.png') no-repeat center center;
     background-size: 10px 10px;
 }
 .copy:hover{
