@@ -217,32 +217,32 @@ let dateString = getCurrentDateString(getCookie('selected_day'));
                     datasets: [
                         {
                             label: "blood pressure",
-                            backgroundColor: "rgba(0,0,255,1.0)",
-                            borderColor: "rgba(0,0,255,0.1)",
+                            backgroundColor: "#648FFF",
+                            borderColor: "#648FFF",
                             data: healthvalues0
                         },
                         {
                             label: "heart rate",
-                            backgroundColor: "rgba(0,0,255,1.0)",
-                            borderColor: "rgba(0,0,255,0.1)",
+                            backgroundColor: "#785EF0",
+                            borderColor: "#785EF0",
                             data: healthvalues1
                         },
                         {
                             label: "oxygen levels",
-                            backgroundColor: "rgba(0,0,255,1.0)",
-                            borderColor: "rgba(0,0,255,0.1)",
+                            backgroundColor: "#DC267F",
+                            borderColor: "#DC267F",
                             data: healthvalues2
                         },
                         {
                             label: "glucose levels",
-                            backgroundColor: "rgba(0,0,255,1.0)",
-                            borderColor: "rgba(0,0,255,0.1)",
+                            backgroundColor: "#FE6100",
+                            borderColor: "#FE6100",
                             data: healthvalues3
                         },
                         {
                             label: "respiratory rate",
-                            backgroundColor: "rgba(0,0,255,1.0)",
-                            borderColor: "rgba(0,0,255,0.1)",
+                            backgroundColor: "#FFB000",
+                            borderColor: "#FFB000",
                             data: healthvalues4
                         },
                     ]
@@ -413,7 +413,11 @@ function updateSlideContent(dateString){
 // Function to handle the content editing
 function editSlideContent(dataid, newText, dateString){
     if (healthData[dateString]) {
-        healthData[dateString][dataid] = newText; // Update the text in the dictionary
+        if (newText.trim() != "") {
+            healthData[dateString][dataid] = newText; // Update the text in the dictionary
+        } else {
+            healthData[dateString][dataid] = "-";
+        }
         updateSlideContent(dateString); // Apply the update to the slides (including inactive)
     } else {
         healthData[dateString] = {
