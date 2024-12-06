@@ -12,24 +12,25 @@ nav {
     top: 0;
     left: 0;
     background-color: #ffffff; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
 }
 
 .nav-link {
-    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-top: 20%;
-    justify-items: center;
-
+    width: 3vw;
+    height: 3vw;
 }
 
 .nav-link.active {
-    border-radius: 25%;
-    width: 3vw;
-    height: 3vw;
-    text-align: center;
-    align-content: center;
+    border-radius: 1em;
 }
 
 .icons {
-    font-size: large;
+    font-size: 1.2vw;
 }

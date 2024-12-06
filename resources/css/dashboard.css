@@ -243,11 +243,11 @@ fieldset {
 }
 
 #weekly-graph-container {
-    margin-top: 5%;
+    margin-top: 4%;
     border-radius: 1vw;
     background-color: white;
     width: 85%;
-    height: 25vw;
+    height: 20vw;
     flex-shrink: 0;
     justify-self: center;
 }
