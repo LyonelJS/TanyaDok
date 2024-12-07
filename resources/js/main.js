@@ -199,10 +199,6 @@ function getCurrentDateString(selectedDate) {
 }
 // Retrieve the selected date from the cookie
 let dateString = getCurrentDateString(getCookie('selected_day'));
-
-
-
-
             const xValues = [ "sun", "mon", "tues", "wed", "thurs", "fri", "sat"];
             let healthvalues0 = [];
             let healthvalues1 = [];
@@ -280,7 +276,10 @@ function updateGraphForWeek(selectedDate) {
 
         // Update the chart dataset for this metric
         myChart.data.datasets[j].data = yValues;
+        
     }
+    document.getElementById("week").innerText = 
+    getCurrentDateString(startOfWeek).split("-").join("/") + " - " +  getCurrentDateString(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + 6)).split("-").join("/");
 
     // Re-render the chart with updated data
     myChart.update(); 
@@ -452,6 +451,52 @@ document.querySelector('.carousel-control-prev').addEventListener('click', funct
     $('#recipeCarousel').carousel('prev');
     updateSlideContent(dateString); // Re-sync after moving previous
 });
+        const addReminderButton = document.getElementById('add-reminder');
+        const remindersList = document.getElementById('reminders-list');
+
+       // Event listener to add a new reminder
+       addReminderButton.addEventListener('click', function() {
+        const reminder = document.createElement('div');
+        reminder.classList.add('reminder');
+
+        // Checkbox
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+
+        // Reminder text
+        const reminderText = document.createElement('span');
+        reminderText.textContent = `Reminder ${remindersList.children.length + 1}`;
+        reminderText.setAttribute('contenteditable', 'true');
+
+        reminder.addEventListener('click', function (event) {
+            // Allow checkbox default behavior
+            if (event.target.type === 'checkbox') {
+                return; // Exit the function, allowing checkbox interaction
+            }
+        
+            // Prevent clicks on non-editable elements from stealing focus
+            if (!event.target.isContentEditable) {
+                event.preventDefault();
+            }
+        });
+        // Delete button (trashcan icon)
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('delete-btn');
+        deleteButton.innerHTML = '&#128465;'; // Trashcan emoji
+
+        // Add event listener to delete button
+        deleteButton.addEventListener('click', function() {
+            remindersList.removeChild(reminder);
+        });
+
+        // Append elements to the reminder div
+        reminder.appendChild(checkbox);
+        reminder.appendChild(reminderText);
+        reminder.appendChild(deleteButton);
+
+        // Append reminder to the list
+        remindersList.appendChild(reminder);
+    });
 
 
         });

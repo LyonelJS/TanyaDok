@@ -25,6 +25,7 @@ nav {
     margin-top: 20%;
     width: 3vw;
     height: 3vw;
+    text-decoration: none !important;
 }
 
 .nav-link.active {

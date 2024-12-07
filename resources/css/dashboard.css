@@ -22,6 +22,10 @@ h6 {
 .health-values {
   padding-top: 10%;
   font-size: 3vw;
+  border: none;
+}
+.health-values:focus {
+  border: none;
 }
 
 
@@ -48,11 +52,11 @@ li {
 .health-tracker-containers {
     border-radius: 1vw;
     background-color: white;
-    width: 13vw;
-    height: 10vw;
+    width: 13em;
+    height: 10em;
     flex-shrink: 0;
-    margin-left: 3%;
 }
+
 
 #profile {
   height: fit-content;
@@ -123,7 +127,9 @@ li {
   .calendar-wrap {
     width: 85%;
     background: #fff;
-    padding: 40px 20px 0px 20px; }
+    padding: 10% 5% 0px 5%;
+  
+  }
     @media (max-width: 767.98px) {
       .calendar-wrap {
         width: 100%; } }
@@ -132,7 +138,7 @@ li {
     width: 100%; }
   
   #calendar tr {
-    height: 3.5em; }
+    height: 3.3em; }
   
   thead tr {
     color: #000;
@@ -234,12 +240,15 @@ li {
     transform: scale(0.8); }
 legend { 
     float: none; 
-    padding: inherit; }
+    padding: inherit;
+    border: none;
+   }
 
-fieldset {
+#reminders-container {
     border: 3px solid black;
     width: 80%;
     text-align: center;
+    min-height: 18vw;
 }
 
 #weekly-graph-container {
@@ -287,4 +296,59 @@ fieldset {
 .carousel-inner .carousel-item-start { 
   transform: translateX(0);
 }
+span[contenteditable="true"] {
+  cursor: text;
+}
+span[contenteditable="true"] {
+  outline: none;
+}
+.reminder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 95%;
+  height: 2.5vw;
+}
 
+.reminder input[type="checkbox"] {
+  margin-right: 1%;
+}
+
+.reminder span {
+  flex: 1;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+  font-size: 2vw;
+}
+
+.delete-btn:hover {
+  color: darkred;
+}
+
+#add-reminder {
+  display: block;
+  margin: 0 5% 5% 0;
+  padding: 1% 1%;
+  background-color: #0d6dfdac;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 25%;
+  float: right;
+  font-size: 0.7vw;
+}
+
+#add-reminder:hover {
+  background-color: #0D6EFD;
+}

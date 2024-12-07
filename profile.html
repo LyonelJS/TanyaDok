@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Profile Page</title>
+  <style>
+    /* General Reset and Body Center */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+    }
+
+    /* Main Profile Container */
+    .container {
+      background: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px 30px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Arrow Redirect Icon */
+    .arrow-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #333;
+      text-decoration: none;
+    }
+
+    /* Profile Circle */
+    .profile-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: #ddd;
+      margin: 10px auto;
+      cursor: pointer;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid #aaa;
+    }
+
+    /* Input Fields */
+    .profile-fields input {
+      width: 100%;
+      padding: 8px 5px;
+      margin: 5px 0;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    /* Buttons Section */
+    .buttons-container {
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-logout {
+      background-color: red;
+    }
+
+    .btn-logout:hover {
+      background-color: darkred;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px 20px;
+      }
+
+      .profile-circle {
+        width: 100px;
+        height: 100px;
+      }
+
+      .profile-fields input {
+        font-size: 12px;
+      }
+
+      .btn {
+        font-size: 12px;
+        padding: 8px 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .profile-circle {
+        width: 80px;
+        height: 80px;
+      }
+
+      .btn {
+        padding: 8px 12px;
+        font-size: 10px;
+      }
+
+      .profile-fields input {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="arrow-btn" href="https://example.com">←</a>
+  <div class="container">
+    <!-- Profile Image Placeholder -->
+    <div
+      class="profile-circle"
+      id="profileCircle"
+      style="background-image: url('');"
+    ></div>
+    
+    <!-- Editable Fields Section -->
+    <div class="profile-fields">
+      <input type="text" id="name" placeholder="Name">
+      <input type="date" id="birthdate" placeholder="Birthdate">
+      <input type="text" id="bloodType" placeholder="Blood Type">
+      <input type="number" id="height" placeholder="Height (cm)">
+      <input type="number" id="weight" placeholder="Weight (kg)">
+      <input type="email" id="email" placeholder="Email">
+    </div>
+
+    <!-- Buttons Section -->
+    <div class="buttons-container">
+      <button class="btn btn-logout" id="logoutBtn">Logout</button>
+      <button class="btn" id="saveBtn">Save</button>
+    </div>
+  </div>
+
+  <script>
+    const profileCircle = document.getElementById('profileCircle');
+    const saveButton = document.getElementById('saveBtn');
+    const logoutButton = document.getElementById('logoutBtn');
+
+    const nameInput = document.getElementById('name');
+    const birthdateInput = document.getElementById('birthdate');
+    const bloodTypeInput = document.getElementById('bloodType');
+    const heightInput = document.getElementById('height');
+    const weightInput = document.getElementById('weight');
+    const emailInput = document.getElementById('email');
+
+    /** Handle Image Upload */
+    profileCircle.addEventListener('click', function () {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.click();
+
+      fileInput.onchange = function () {
+        const file = fileInput.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            profileCircle.style.backgroundImage = `url(${e.target.result})`;
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+    });
+
+    /** Save Data to Local Storage */
+    saveButton.addEventListener('click', function () {
+      const userData = {
+        name: nameInput.value,
+        birthdate: birthdateInput.value,
+        bloodType: bloodTypeInput.value,
+        height: heightInput.value,
+        weight: weightInput.value,
+        email: emailInput.value,
+      };
+
+      localStorage.setItem('userData', JSON.stringify(userData));
+      alert('Data saved!');
+    });
+
+    /** Load Data on Page Load */
+    window.onload = function () {
+      const savedData = JSON.parse(localStorage.getItem('userData'));
+
+      if (savedData) {
+        nameInput.value = savedData.name || '';
+        birthdateInput.value = savedData.birthdate || '';
+        bloodTypeInput.value = savedData.bloodType || '';
+        heightInput.value = savedData.height || '';
+        weightInput.value = savedData.weight || '';
+        emailInput.value = savedData.email || '';
+      }
+    };
+
+    /** Logout Button Functionality */
+    logoutButton.addEventListener('click', function () {
+      alert('Logged out');
+      window.location.href = 'https://example.com'; // Change this URL to redirect to actual logout page
+    });
+  </script>
+</body>
+</html>
