@@ -1,0 +1,290 @@
+body {
+    display: flex;
+    margin: 0;
+    height: 100vh;
+    font-size: 1vw;
+    font-family: 'Kumbh Sans', sans-serif;
+}
+.editable {
+  border: 1px dashed transparent;
+  padding: 5px;
+}
+.editable:focus {
+  border: 1px dashed #007BFF;
+  outline: none;
+}
+
+h6 {
+  padding-top: 5%;
+  font-size: 1vw;
+}
+
+.health-values {
+  padding-top: 10%;
+  font-size: 3vw;
+}
+
+
+#content {
+    flex-grow: 1;
+    background-color: #e9ecef;
+    margin-left: 5%;
+}
+
+label {
+  font-weight: 100;
+}
+
+li {
+  width: 100%;
+  text-align: left;
+  padding-bottom: 1%;
+}
+/* To hide the scrollbar, you can use the following CSS, but this might not work in all browsers: */
+::-webkit-scrollbar {
+    display: none; /* For WebKit browsers */
+}
+
+.health-tracker-containers {
+    border-radius: 1vw;
+    background-color: white;
+    width: 13vw;
+    height: 10vw;
+    flex-shrink: 0;
+    margin-left: 3%;
+}
+
+#profile {
+  height: fit-content;
+  width: 3vw;
+  margin: 5% 0 0 50%;
+  float: right;
+}
+#header {
+    width: 100%;
+    position: relative; }
+    #header .pre-button, #header .next-button {
+      cursor: pointer;
+      width: 1em;
+      height: 1em;
+      line-height: 1em;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+      transform: translateY(-50%);
+       }
+      #header .pre-button i, #header .next-button i {
+        color: #fff; }
+  
+  .pre-button {
+    padding-top: 5%;
+    padding-left: 70%;
+    left: 5px; }
+  
+  .next-button {
+    padding-top: 5%;
+    padding-right: 5%;
+    right: 5px; }
+  
+  .button-wrap {
+    position: relative;
+    padding: 10px 0;
+    margin-left: 4%; }
+    .button-wrap .pre-button, .button-wrap .next-button {
+      cursor: pointer;
+      width: 1em;
+      height: 1em;
+      line-height: 1em;
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      font-size: 18px; }
+      .button-wrap .pre-button i, .button-wrap .next-button i {
+        color: #cccccc; }
+    .button-wrap .pre-button {
+      left: 20px; }
+    .button-wrap .next-button {
+      right: 20px; }
+  
+  .head-day {
+    font-size: 1em;
+    line-height: 1;
+    color: black; }
+  
+  .head-month {
+    font-size: 1em;
+    line-height: 1;
+    color: black;
+    text-transform: uppercase;
+    font-weight: 300; }
+  
+  .calendar-wrap {
+    width: 85%;
+    background: #fff;
+    padding: 40px 20px 0px 20px; }
+    @media (max-width: 767.98px) {
+      .calendar-wrap {
+        width: 100%; } }
+  
+  #calendar {
+    width: 100%; }
+  
+  #calendar tr {
+    height: 3.5em; }
+  
+  thead tr {
+    color: #000;
+    font-weight: 700; }
+  
+  tbody tr {
+    color: #000; }
+  
+  tbody td {
+    text-align: center;
+    font-size: medium;
+    width: 14%;
+    border-radius: 50%;
+    cursor: pointer;
+    -webkit-transition: all 0.2s ease-in;
+    -o-transition: all 0.2s ease-in;
+    transition: all 0.2s ease-in;
+    position: relative;
+    z-index: 0; }
+    tbody td:after {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      content: '';
+      width: 30px;
+      height: 30px;
+      margin: 0 auto;
+      -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+      transform: translate(-2%, -50%);
+      border-radius: 50%;
+      -webkit-transition: 0.3s;
+      -o-transition: 0.3s;
+      transition: 0.3s;
+      z-index: -1; }
+      @media (prefers-reduced-motion: reduce) {
+        tbody td:after {
+          -webkit-transition: none;
+          -o-transition: none;
+          transition: none; } }
+  
+  tbody td:hover, .selected {
+    color: #fff;
+    border: none; }
+    tbody td:hover:after, .selected:after {
+      background: #2a3246; }
+  
+  tbody td:active {
+    -webkit-transform: scale(0.7);
+    -ms-transform: scale(0.7);
+    transform: scale(0.7); }
+  th {
+    text-align: center;
+  }
+  #today {
+    color: #fff; }
+    #today:after {
+      background: #0D6EFD; }
+  
+  #disabled {
+    cursor: default;
+    background: #fff; }
+  
+  #disabled:hover {
+    background: #fff;
+    color: #c9c9c9; }
+    #disabled:hover:after {
+      background: transparent; }
+  
+  #reset {
+    display: block;
+    background-color: #cccccc;
+    margin-top: 1%;
+    margin-right: 37%;
+    position: absolute;
+    right: 0.5em;
+    top: 0.5em;
+    z-index: 999;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 0 0.5em;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    -webkit-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 11px; }
+  
+  #reset:hover {
+    color: #fff;
+    border-color: #fff; }
+  
+  #reset:active {
+    -webkit-transform: scale(0.8);
+    -ms-transform: scale(0.8);
+    transform: scale(0.8); }
+legend { 
+    float: none; 
+    padding: inherit; }
+
+fieldset {
+    border: 3px solid black;
+    width: 80%;
+    text-align: center;
+}
+
+#weekly-graph-container {
+    margin-top: 4%;
+    border-radius: 1vw;
+    background-color: white;
+    width: 85%;
+    height: 20vw;
+    flex-shrink: 0;
+    justify-self: center;
+}
+
+@media (max-width: 767px) {
+    .carousel-inner .carousel-item > div {
+        display: none;
+    }
+    .carousel-inner .carousel-item > div:first-child {
+        display: block;
+    }
+}
+.carousel-inner {
+    overflow: visible; /* Ensure sliding animations are visible */
+}
+.carousel-inner .carousel-item.active,
+.carousel-inner .carousel-item-next,
+.carousel-inner .carousel-item-prev {
+    display: flex;
+}
+
+/* medium and up screens */
+@media (min-width: 768px) {
+    
+    .carousel-inner .carousel-item-end.active,
+    .carousel-inner .carousel-item-next {
+      transform: translateX(25%);
+    }
+    
+    .carousel-inner .carousel-item-start.active, 
+    .carousel-inner .carousel-item-prev {
+      transform: translateX(-25%);
+    }
+}
+
+.carousel-inner .carousel-item-end,
+.carousel-inner .carousel-item-start { 
+  transform: translateX(0);
+}
+
