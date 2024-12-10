@@ -116,6 +116,23 @@
       position:absolute;
       z-index:1000;
     }
+    #inputContainer{
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px 30px;
+      width: 100%;
+      height:25%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      position:absolute;
+      z-index:1000;
+    }
+    #inputContainer *{
+      margin-top:15%;
+    }
+    
     .hidden{
       display:none;
     }
@@ -173,13 +190,17 @@
       <button class="btn" id="noBtn">No</button>
     </div>
   </div>
+  
+  <div id="inputContainer" class="hidden">
+    <input type="text" id="imageUrlInput" placeholder="Enter image URL" />
+    <button id="uploadImageButton" class="btn">Upload Image</button>
+  </div>
 
   <div class="container" id="container">
     <!-- Profile Image Placeholder -->
     <div
       class="profile-circle"
       id="profileCircle"
-      style="background-image: url('');"
     ></div>
     
     <!-- Editable Fields Section -->
@@ -216,28 +237,38 @@
     const heightInput = document.getElementById('height');
     const weightInput = document.getElementById('weight');
     const emailInput = document.getElementById('email');
+    // Upload image button event
+    const uploadImageButton = document.getElementById('uploadImageButton');
+    const imageUrlInput = document.getElementById('imageUrlInput');
+    const inputContainer = document.getElementById('inputContainer')
+    let imageUrl;
 
     // Get a reference to the storage service
 
-    /** Handle Image Upload */
-    profileCircle.addEventListener('click', function () {
-      const fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = 'image/*';
-      fileInput.click();
-
-      fileInput.onchange = function () {
-        const file = fileInput.files[0];
-        if (file) {
-          profilePicture = file;
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            profileCircle.style.backgroundImage = `url(${e.target.result})`;
-          };
-          reader.readAsDataURL(file);
-        }
-      };
+    profileCircle.addEventListener('click', function() {
+      inputContainer.classList.toggle('hidden');
     });
+
+    uploadImageButton.addEventListener('click', function() {
+      const url = imageUrlInput.value.trim();
+      if (url) {
+        // Validate URL format
+        if (url.match(/https?:\/\/[^\s]+/)) {
+          imageUrl = url
+          profileCircle.style.backgroundImage = `url(${url})`;
+          profileCircle.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
+          profileCircle.style.backgroundPosition = 'center'; // Optional: center the image
+          profileCircle.style.backgroundRepeat = 'no-repeat'; // Optional: prevent image repetition
+          imageUrlInput.value = ''; // Clear the input field after setting the image
+          inputContainer.classList.add('hidden');
+        } else {
+          alert('Please enter a valid image URL.');
+        }
+      } else {
+        alert('Please enter an image URL.');
+      }
+    });
+
 // Listen for changes in the authentication state
 auth.onAuthStateChanged((user) => {
   if (user) {
@@ -247,6 +278,14 @@ auth.onAuthStateChanged((user) => {
     // Replace non-alphanumeric characters in the email for database path usage
     const userEmailKey = user.email.replace(/[^a-zA-Z0-9]/g, ',');
 
+    // Fetch user data from the database
+    db.ref(`users/${userEmailKey}/profilePicture`).once('value').then(snapshot => {
+      const profilePicture = snapshot.val();
+      profileCircle.style.backgroundImage = `url(${profilePicture})`;
+      profileCircle.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
+      profileCircle.style.backgroundPosition = 'center'; // Optional: center the image
+      profileCircle.style.backgroundRepeat = 'no-repeat'; // Optional: prevent image repetition    });
+    });
     // Fetch user data from the database
     db.ref(`users/${userEmailKey}/username`).once('value').then(snapshot => {
       const username = snapshot.val();
@@ -298,6 +337,10 @@ saveButton.addEventListener('click', function() {
   if (user) {
 
     // Update data in Firebase under separate paths
+    db.ref(`users/${userEmailKey}/profilePicture`).set(imageUrl)
+      .then(() => console.log('Username updated successfully!'))
+      .catch(error => alert('Error updating username: ' + error.message));
+    
     db.ref(`users/${userEmailKey}/username`).set(username)
       .then(() => console.log('Username updated successfully!'))
       .catch(error => alert('Error updating username: ' + error.message));
