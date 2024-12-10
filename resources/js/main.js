@@ -171,7 +171,34 @@
 }, false);
 
 })(jQuery);
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getDatabase, ref, child, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+// TODO: Replace the following with your app's Firebase project configuration
+// See: https://firebase.google.com/docs/web/learn-more#config-object
+const firebaseConfig = {
+    apiKey: "AIzaSyCepN1r_bYYwR-s0jdv2A4gH5hJbWojTes",
+    authDomain: "hci-final-e2c95.firebaseapp.com",
+    projectId: "hci-final-e2c95",
+    storageBucket: "hci-final-e2c95.firebasestorage.app",
+    messagingSenderId: "260974227471",
+    appId: "1:260974227471:web:f07db35c7e81234455b37a",
+    measurementId: "G-SQY9PH3PWZ",
+  // The value of `databaseURL` depends on the location of the database
+  databaseURL: "https://hci-final-e2c95-default-rtdb.asia-southeast1.firebasedatabase.app/",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+let userid;
+onAuthStateChanged(auth, (user) => {
+    userid = user.uid;
+  });
+// Initialize Realtime Database and get a reference to the service
+const database = getDatabase(app);
+const dbRef = ref(getDatabase());
         document.addEventListener("DOMContentLoaded", function () {
             // Function to get a cookie by its name
 function getCookie(name) {
@@ -206,7 +233,7 @@ let dateString = getCurrentDateString(getCookie('selected_day'));
             let healthvalues3 = [];
             let healthvalues4 = [];
 
-            myChart = new Chart("myChart", {
+            let myChart = new Chart("myChart", {
                 type: "line",
                 data: {
                     labels: xValues,
@@ -254,97 +281,46 @@ function getStartOfWeek(date) {
     return startOfWeek;
 }
 function updateGraphForWeek(selectedDate) {
-    let startOfWeek = getStartOfWeek(selectedDate); // Get the start of the week (Sunday)
+    let startOfWeek = getStartOfWeek(selectedDate); // Determine the start of the week (Sunday)
+    const healthMetrics = ["bloodPressure", "heartRate", "glucoseLevel", "oxygenLevel", "respiratoryRate"];
     
-    // Loop through each health metric (blood pressure, heart rate, etc.)
-    for (let j = 0; j < 5; j++) { // 5 health metrics
-        let yValues = []; // Start with an empty array for each dataset
-        let dayString;
-        // Loop through each day of the week, starting from the calculated Sunday
+    const listeners = []; // Keep track of listeners for cleanup later if needed
+
+    // Loop through each health metric
+    for (let j = 0; j < healthMetrics.length; j++) {
+        let yValues = Array(7).fill(null); // Start with empty values for each day of the week
+        const healthMetricRef = ref(database, `health-data/${userid}/`);
+
+        // Set up real-time listener for each day's data
         for (let i = 0; i < 7; i++) {
-            const day = new Date(startOfWeek);
-            day.setDate(startOfWeek.getDate() + i); // Set the date for each day of the week
-            dayString = getCurrentDateString(day);
-            // Fetch the data for this day (assuming healthData contains this)
-            if (healthData[dayString] && healthData[dayString][j] != "-") {
-                // Assuming healthData stores values for each day
-                yValues.push(parseInt(healthData[dayString][j])); // Push health metric value for the day
-            } else {
-                yValues.push(null); // No data available for that day
-            }
+            const date = new Date(startOfWeek);
+            date.setDate(startOfWeek.getDate() + i);
+            const dayString = getCurrentDateString(date);
+
+            const refPath = `${healthMetrics[j]}/${dayString}`;
+            const dataRef = ref(database, `health-data/${userid}/${dayString}/${healthMetrics[j]}`);
+
+            const unsubscribe = onValue(dataRef, (snapshot) => {
+                const value = snapshot.exists() ? snapshot.val() : null;
+                yValues[i] = value !== "-" ? value : null; // Handle missing or invalid values
+                myChart.data.datasets[j].data = yValues; // Update the chart with new values
+                myChart.update();
+            });
+
+            listeners.push(unsubscribe);
         }
-
-        // Update the chart dataset for this metric
-        myChart.data.datasets[j].data = yValues;
-        
     }
+
     document.getElementById("week").innerText = 
-    getCurrentDateString(startOfWeek).split("-").join("/") + " - " +  getCurrentDateString(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + 6)).split("-").join("/");
+        getCurrentDateString(startOfWeek).split("-").join("/") + " - " +
+        getCurrentDateString(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + 6)).split("-").join("/");
 
-    // Re-render the chart with updated data
-    myChart.update(); 
+    // Cleanup listeners if they exist (Optional: only needed if you dynamically unsubscribe from listeners)
+    window.cleanupListeners = function() {
+        listeners.forEach(unsub => unsub());
+    };
 }
-
-
-let healthData = {
-    "1-12-2024": {
-        "0": "91",
-        "1": "73",
-        "2": "4500",
-        "3": "110",
-        "4": "8"
-    },
-    "2-12-2024": {
-        "0": "93",
-        "1": "75",
-        "2": "6000",
-        "3": "130",
-        "4": "7"
-    },
-    "3-12-2024": {
-        "0": "94",
-        "1": "76",
-        "2": "3500",
-        "3": "1050",
-        "4": "9"
-    },
-    "4-12-2024": {
-        "0": "95",
-        "1": "77",
-        "2": "4700",
-        "3": "125",
-        "4": "6"
-    },
-    "5-12-2024": {
-      "0": "90",
-      "1": "72",
-      "2": "5000",
-      "3": "100",
-      "4": "10"
-    },
-    "6-12-2024": {
-      "0": "92",
-      "1": "74",
-      "2": "3000",
-      "3": "1200",
-      "4": "9"
-    },
-    "7-12-2024": {
-        "0": "96",
-        "1": "78",
-        "2": "5200",
-        "3": "1100",
-        "4": "8"
-    },
-    "8-12-2024": {
-        "0": "12",
-        "1": "13",
-        "2": "14",
-        "3": "13",
-        "4": "12"
-    }
-  };
-  document.addEventListener("click", function () {
+  document.getElementById("calendar").addEventListener("click", function () {
     dateString = getCurrentDateString(getCookie('selected_day'))
     
     editSlideContent("-1", "none", dateString);
@@ -375,10 +351,17 @@ const enhanceCloningLogic = () => {
             next = next.nextElementSibling; // Move to the next sibling
         }
     });
-
+    set(ref(database, `health-data/${userid}/${dateString}`), {
+        bloodPressure: "-",
+        heartRate: "-",
+        oxygenLevel: "-",
+        glucoseLevel: "-",
+        respiratoryRate: "-"
+      });
     // After cloning, sync the text content from the data structure to the slides
     updateSlideContent(dateString); // Ensure initial content is set for all slides, including inactive ones
 };
+
 let isEditing = false; // Track editing state
 
 // Set the editing state on focus
@@ -402,39 +385,44 @@ function updateSlideContent(dateString){
         const editableElements = slide.querySelectorAll('.editable'); // Find all editable elements within the slide
         editableElements.forEach((editableElement) => {
             const dataid = editableElement.getAttribute('data-id'); // Get the data-id attribute
-            if (healthData[dateString]) {
-                editableElement.innerText = healthData[dateString][dataid]; // Update the text from the dictionary
-            }
+            get(ref(database, `health-data/${userid}/${dateString}/${dataid}`)).then((snapshot) => {
+                editableElement.innerText = snapshot.val();
+            });
         });
     });
     updateGraphForWeek(getCookie('selected_day'));
 };
 // Function to handle the content editing
 function editSlideContent(dataid, newText, dateString){
-    if (healthData[dateString]) {
-        if (newText.trim() != "") {
-            healthData[dateString][dataid] = newText; // Update the text in the dictionary
-        } else {
-            healthData[dateString][dataid] = "-";
+    get(ref(database, `health-data/${userid}/${dateString}`)).then((snapshot) => {
+        if (snapshot.exists()) {
+            if (dataid != "-1") {
+            if (newText.trim() != "") {
+                update(ref(database, `health-data/${userid}/${dateString}`), {
+                    [dataid]: newText,
+                  });
+            } else {
+                update(ref(database, `health-data/${userid}/${dateString}`), {
+                    [dataid]: "-",
+                  });
+            }
         }
-        updateSlideContent(dateString); // Apply the update to the slides (including inactive)
-    } else {
-        healthData[dateString] = {
-            "0": "-",
-            "1": "-",
-            "2": "-",
-            "3": "-",
-            "4": "-" 
-        };
+        } else {
+            set(ref(database, `health-data/${userid}/${dateString}`), {
+                bloodPressure: "-",
+                heartRate: "-",
+                oxygenLevel: "-",
+                glucoseLevel: "-",
+                respiratoryRate: "-"
+              });
+            }
         if (dataid != "-1") {
             editSlideContent(dataid, newText, dateString);
         } else {
-            updateSlideContent(dateString)
+            updateSlideContent(dateString);
         }
-    }
+    });
 };
-
-
 // Initialize the carousel by cloning and syncing content
 enhanceCloningLogic();
 
