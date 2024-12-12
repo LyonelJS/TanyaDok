@@ -772,6 +772,7 @@ function checkContainerWidth(width){
     hidePrompts();
     showPromptButton.classList.add('hidden')
   } else {
+    checkUserMessage();
     showPromptButton.classList.remove('hidden');
   }
 
