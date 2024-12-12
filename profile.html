@@ -132,6 +132,14 @@
     #inputContainer *{
       margin-top:15%;
     }
+    #close-button{
+      position:absolute;
+      margin-left:80%;
+      margin-top:0%;
+      background-color:none;
+      cursor: pointer;
+      border:none;
+    }
     
     .hidden{
       display:none;
@@ -192,6 +200,8 @@
   </div>
   
   <div id="inputContainer" class="hidden">
+    <button id="close-button" class="">X</button>
+
     <input type="text" id="imageUrlInput" placeholder="Enter image URL" />
     <button id="uploadImageButton" class="btn">Upload Image</button>
   </div>
@@ -241,13 +251,21 @@
     const uploadImageButton = document.getElementById('uploadImageButton');
     const imageUrlInput = document.getElementById('imageUrlInput');
     const inputContainer = document.getElementById('inputContainer')
+    const body = document.getElementById('container')
+    const closeUpload = document.getElementById('close-button')
     let imageUrl;
 
     // Get a reference to the storage service
 
     profileCircle.addEventListener('click', function() {
       inputContainer.classList.toggle('hidden');
+      body.classList.toggle('blur')
     });
+
+    closeUpload.addEventListener('click', function(){
+      inputContainer.classList.add('hidden');
+      body.classList.remove('blur');
+    })
 
     uploadImageButton.addEventListener('click', function() {
       const url = imageUrlInput.value.trim();
@@ -381,7 +399,6 @@ saveButton.addEventListener('click', function() {
     const deleteContainer = document.getElementById('deleteContainer');
     const noBtn = document.getElementById('noBtn');
     const yesBtn = document.getElementById('yesBtn');
-    const body = document.getElementById('container')
 
     deleteBtn.addEventListener('click', function(){
       deleteContainer.classList.remove('hidden');
