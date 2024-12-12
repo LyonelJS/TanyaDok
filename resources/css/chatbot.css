@@ -526,10 +526,10 @@ body {
         width:100%;
     }
     #close{
-        margin-bottom:30%;
-        position:fixed;
+        margin-bottom:40%;
+        position:absolute;
         height:2%;
-        margin-left:75%;
+        margin-left:85%;
     }
     @media (max-height: 800px) {
         .super-container{
