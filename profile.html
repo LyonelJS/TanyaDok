@@ -57,6 +57,11 @@
       border: 2px solid #aaa;
     }
 
+    #previewCircle{
+      width:190px;
+      height:190px;
+    }
+
     /* Input Fields */
     .profile-fields input {
       width: 100%;
@@ -122,7 +127,7 @@
       border-radius: 10px;
       padding: 20px 30px;
       width: 100%;
-      height:25%;
+      height:50%;
       max-width: 400px;
       text-align: center;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -130,11 +135,12 @@
       z-index:1000;
     }
     #inputContainer *{
-      margin-top:15%;
+      margin-top:7%;
+      margin-bottom:2%;
     }
     #close-button{
       position:absolute;
-      margin-left:80%;
+      margin-left:40%;
       margin-top:0%;
       background-color:none;
       cursor: pointer;
@@ -147,6 +153,11 @@
     .blur {
       filter: blur(5px);
       pointer-events: none; /* Optional: prevent interaction with blurred content */
+    }
+    .instruction{
+      font-size:x-small;
+      margin-top:0px !important;
+
     }
 
     /* Responsive Design */
@@ -202,8 +213,14 @@
   <div id="inputContainer" class="hidden">
     <button id="close-button" class="">X</button>
 
+    <div
+      class="profile-circle"
+      id="previewCircle"
+    ></div>
     <input type="text" id="imageUrlInput" placeholder="Enter image URL" />
     <button id="uploadImageButton" class="btn">Upload Image</button>
+    <p class="instruction">Input the image address to use as a profile picture</p>
+
   </div>
 
   <div class="container" id="container">
@@ -250,24 +267,79 @@
     // Upload image button event
     const uploadImageButton = document.getElementById('uploadImageButton');
     const imageUrlInput = document.getElementById('imageUrlInput');
-    const inputContainer = document.getElementById('inputContainer')
-    const body = document.getElementById('container')
-    const closeUpload = document.getElementById('close-button')
+    const inputContainer = document.getElementById('inputContainer');
+    const body = document.getElementById('container');
+    const closeUpload = document.getElementById('close-button');
+    const previewCircle = document.getElementById('previewCircle');
     let imageUrl;
 
     // Get a reference to the storage service
 
     profileCircle.addEventListener('click', function() {
+      const user = auth.currentUser;
+
+      // Use the user.email value directly for display purposes
+      const userEmail = user.email;
+
+      // Replace non-alphanumeric characters in the email for database path usage
+      const userEmailKey = userEmail.replace(/[^a-zA-Z0-9]/g, ',');
+
       inputContainer.classList.toggle('hidden');
       body.classList.toggle('blur')
+      // Fetch user data from the database
+      db.ref(`users/${userEmailKey}/profilePicture`).once('value').then(snapshot => {
+        const profilePicture = snapshot.val();
+        previewCircle.style.backgroundImage = `url(${profilePicture})`;
+        previewCircle.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
+        previewCircle.style.backgroundPosition = 'center'; // Optional: center the image
+        previewCircle.style.backgroundRepeat = 'no-repeat'; // Optional: prevent image repetition    });
+      });
+      
     });
+
+    imageUrlInput.addEventListener('input', function () {
+      const user = auth.currentUser;
+
+      // Use the user.email value directly for display purposes
+      const userEmail = user.email;
+
+      // Replace non-alphanumeric characters in the email for database path usage
+      const userEmailKey = userEmail.replace(/[^a-zA-Z0-9]/g, ',');
+
+      const url = imageUrlInput.value.trim();
+      if (url.match(/https?:\/\/[^\s]+/)) {
+        previewCircle.style.backgroundImage = `url(${url})`;
+        previewCircle.style.backgroundSize = 'cover'; // Optional
+        previewCircle.style.backgroundPosition = 'center'; // Optional
+        previewCircle.style.backgroundRepeat = 'no-repeat'; // Optional
+      } else {
+      // Fetch user data from the database
+      db.ref(`users/${userEmailKey}/profilePicture`).once('value').then(snapshot => {
+              const profilePicture = snapshot.val();
+              previewCircle.style.backgroundImage = `url(${profilePicture})`;
+              previewCircle.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
+              previewCircle.style.backgroundPosition = 'center'; // Optional: center the image
+              previewCircle.style.backgroundRepeat = 'no-repeat'; // Optional: prevent image repetition    });
+            });
+        }
+    });
+
 
     closeUpload.addEventListener('click', function(){
       inputContainer.classList.add('hidden');
       body.classList.remove('blur');
+      imageUrlInput.value = ''; // Clear the input field after setting the image
     })
 
     uploadImageButton.addEventListener('click', function() {
+      const user = auth.currentUser;
+
+      // Use the user.email value directly for display purposes
+      const userEmail = user.email;
+
+      // Replace non-alphanumeric characters in the email for database path usage
+      const userEmailKey = userEmail.replace(/[^a-zA-Z0-9]/g, ',');
+
       const url = imageUrlInput.value.trim();
       if (url) {
         // Validate URL format
@@ -279,9 +351,16 @@
           profileCircle.style.backgroundRepeat = 'no-repeat'; // Optional: prevent image repetition
           imageUrlInput.value = ''; // Clear the input field after setting the image
           inputContainer.classList.add('hidden');
-        } else {
-          alert('Please enter a valid image URL.');
-        }
+          body.classList.remove('blur');
+
+          // Update data in Firebase under separate paths
+          db.ref(`users/${userEmailKey}/profilePicture`).set(imageUrl)
+            .then(() => console.log('Username updated successfully!'))
+            .catch(error => alert('Error updating username: ' + error.message));
+
+              } else {
+                alert('Please enter a valid image URL.');
+              }
       } else {
         alert('Please enter an image URL.');
       }
@@ -353,11 +432,6 @@ saveButton.addEventListener('click', function() {
   const weight = weightInput.value;
 
   if (user) {
-
-    // Update data in Firebase under separate paths
-    db.ref(`users/${userEmailKey}/profilePicture`).set(imageUrl)
-      .then(() => console.log('Username updated successfully!'))
-      .catch(error => alert('Error updating username: ' + error.message));
     
     db.ref(`users/${userEmailKey}/username`).set(username)
       .then(() => console.log('Username updated successfully!'))
