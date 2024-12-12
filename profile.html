@@ -56,12 +56,61 @@
       background-position: center;
       border: 2px solid #aaa;
     }
+    .edit-image{
+      width:40px;
+      height:40px;
+      position:absolute;
+      margin-left:30px;
+      margin-top:-50px;
+    }
 
     #previewCircle{
       width:190px;
       height:190px;
-    }
+  }
+  #previewCircle:hover::before {
+    content: ""; /* Required for pseudo-elements */
+    position: absolute;
+    left: 50%; /* Position it horizontally in the middle */
+    transform: translate(-50%); /* Shift the element back by half of its width/height to center it */
 
+    width: 190px;
+    height: 190px;
+    background-image: url('resources/images/deleteChatButton.png'); /* The overlapping image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 50%; /* Match the circular shape */
+    z-index: 2; /* Ensure it's above the background */
+    opacity: 0.8; /* Optional: Adjust transparency for blending */
+    transition: opacity 0.3s ease; /* Smooth transition effect */
+}
+
+#previewCircle:hover::after {
+    content: ""; /* Required for pseudo-elements */
+    position: absolute;
+    left: 50%; /* Position it horizontally in the middle */
+    transform: translate(-50%); /* Shift the element back by half of its width/height to center it */
+
+    width: 190px;
+    height: 190px;
+    background: rgba(0, 0, 0, 0.5); /* Black color with transparency */
+    filter: blur(5px); /* Apply blur effect */
+    border-radius: 50%; /* Match the circular shape */
+    z-index: 1; /* Ensure it's behind the overlapping image */
+    transition: filter 0.3s ease; /* Smooth transition for blur */
+}
+
+/* Disable hover effects when 'clicked' class is added */
+#previewCircle.clicked:hover::before,
+#previewCircle.clicked:hover::after {
+  content: none !important; /* Disable both the pseudo-elements completely */
+    opacity: 1 !important; /* Prevent opacity change */
+    filter: none !important; /* Remove the blur effect */
+    background-image: none !important; /* Ensure the background image from ::before is removed */
+    background: none !important; /* Remove the background of ::after */
+}
+  
     /* Input Fields */
     .profile-fields input {
       width: 100%;
@@ -165,10 +214,37 @@
       .container {
         padding: 15px 20px;
       }
+      #inputContainer{
+        padding: 15px 20px;
+        width: 100%;
+        height:43%;
+      }
 
       .profile-circle {
         width: 100px;
         height: 100px;
+      }
+      .edit-image{
+        width:30px;
+        height:30px;
+        margin-left:20px;
+        margin-top:-45px;
+      }
+        #previewCircle{
+          width:170px;
+          height:170px;
+          cursor: default;
+      }
+      #previewCircle:hover::before {
+          width: 170px;
+          height: 170px;
+          
+      }
+
+      #previewCircle:hover::after {
+          width: 170px;
+          height: 170px;
+          
       }
 
       .profile-fields input {
@@ -186,6 +262,29 @@
         width: 80px;
         height: 80px;
       }
+      .edit-image{
+        width:20px;
+        height:20px;
+        margin-left:20px;
+        margin-top:-35px;
+      }
+        #previewCircle{
+          width:150px;
+          height:150px;
+          cursor: default;
+      }
+      #previewCircle:hover::before {
+          width: 150px;
+          height: 150px;
+          
+      }
+
+      #previewCircle:hover::after {
+          width: 150px;
+          height: 150px;
+          
+      }
+
 
       .btn {
         padding: 8px 12px;
@@ -218,17 +317,20 @@
       id="previewCircle"
     ></div>
     <input type="text" id="imageUrlInput" placeholder="Enter image URL" />
-    <button id="uploadImageButton" class="btn">Upload Image</button>
+    <button id="uploadImageButton" class="btn">Save Image</button>
     <p class="instruction">Input the image address to use as a profile picture</p>
 
   </div>
 
   <div class="container" id="container">
     <!-- Profile Image Placeholder -->
+     <div>
     <div
       class="profile-circle"
       id="profileCircle"
     ></div>
+    <img src="resources/images/editImage.png" alt="edit image" class="edit-image">
+  </div>
     
     <!-- Editable Fields Section -->
     <div class="profile-fields">
@@ -289,6 +391,14 @@
       // Fetch user data from the database
       db.ref(`users/${userEmailKey}/profilePicture`).once('value').then(snapshot => {
         const profilePicture = snapshot.val();
+        if (profilePicture === 'resources/images/profile.jpg'){
+              previewCircle.classList.add('clicked');
+              previewCircle.style.cursor = 'default';
+            }  else {
+              previewCircle.classList.remove('clicked');
+              previewCircle.style.cursor = 'pointer';
+
+            }
         previewCircle.style.backgroundImage = `url(${profilePicture})`;
         previewCircle.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
         previewCircle.style.backgroundPosition = 'center'; // Optional: center the image
@@ -306,16 +416,25 @@
       // Replace non-alphanumeric characters in the email for database path usage
       const userEmailKey = userEmail.replace(/[^a-zA-Z0-9]/g, ',');
 
+
       const url = imageUrlInput.value.trim();
       if (url.match(/https?:\/\/[^\s]+/)) {
         previewCircle.style.backgroundImage = `url(${url})`;
         previewCircle.style.backgroundSize = 'cover'; // Optional
         previewCircle.style.backgroundPosition = 'center'; // Optional
         previewCircle.style.backgroundRepeat = 'no-repeat'; // Optional
+        previewCircle.classList.remove('clicked');
+        previewCircle.style.cursor = 'pointer';
+
       } else {
       // Fetch user data from the database
       db.ref(`users/${userEmailKey}/profilePicture`).once('value').then(snapshot => {
               const profilePicture = snapshot.val();
+              if (profilePicture === 'resources/images/profile.jpg'){
+                previewCircle.classList.add('clicked');
+                previewCircle.style.cursor = 'default';
+
+              }
               previewCircle.style.backgroundImage = `url(${profilePicture})`;
               previewCircle.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
               previewCircle.style.backgroundPosition = 'center'; // Optional: center the image
@@ -323,6 +442,18 @@
             });
         }
     });
+
+    previewCircle.addEventListener('click', function() {
+      previewCircle.style.backgroundImage = `url('resources/images/profile.jpg')`;
+      previewCircle.style.backgroundSize = '100% 100%'; // Make the image stretch to fill the element
+      previewCircle.style.backgroundPosition = 'center'; // Optional: center the image
+      previewCircle.style.backgroundRepeat = 'no-repeat'; // Optional: prevent image repetition
+
+      previewCircle.classList.add('clicked');
+      previewCircle.style.cursor = 'default';
+      imageUrlInput.value = ''; // Clear the input field after setting the image
+
+  });
 
 
     closeUpload.addEventListener('click', function(){
@@ -361,9 +492,27 @@
               } else {
                 alert('Please enter a valid image URL.');
               }
+              
       } else {
-        alert('Please enter an image URL.');
-      }
+        if (previewCircle.classList.contains('clicked')) {
+          imageUrl = 'resources/images/profile.jpg'
+          profileCircle.style.backgroundImage = `url('resources/images/profile.jpg')`;
+          profileCircle.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
+          profileCircle.style.backgroundPosition = 'center'; // Optional: center the image
+          profileCircle.style.backgroundRepeat = 'no-repeat'; // Optional: prevent image repetition
+          imageUrlInput.value = ''; // Clear the input field after setting the image
+          inputContainer.classList.add('hidden');
+          body.classList.remove('blur');
+
+          // Update data in Firebase under separate paths
+          db.ref(`users/${userEmailKey}/profilePicture`).set(imageUrl)
+            .then(() => console.log('Username updated successfully!'))
+            .catch(error => alert('Error updating username: ' + error.message));
+
+              } else {
+                alert('Please enter a valid image URL.');
+        }
+      } 
     });
 
 // Listen for changes in the authentication state
@@ -378,6 +527,11 @@ auth.onAuthStateChanged((user) => {
     // Fetch user data from the database
     db.ref(`users/${userEmailKey}/profilePicture`).once('value').then(snapshot => {
       const profilePicture = snapshot.val();
+      if (profilePicture === 'resources/images/profile.jpg'){
+        previewCircle.classList.add('clicked');
+        previewCircle.style.cursor = 'default';
+
+      }
       profileCircle.style.backgroundImage = `url(${profilePicture})`;
       profileCircle.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
       profileCircle.style.backgroundPosition = 'center'; // Optional: center the image
