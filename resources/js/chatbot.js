@@ -1,4 +1,4 @@
-const API_KEY = 'AIzaSyBAzKJLyNO5Fbu86aMt2MbYOHNZWZQXbIk'
+const API_KEY = 'AIzaSyD__WGbiXsXPP3spsIT-Cn6SROw6rBpk_Y'
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`
 
 let promptInput = document.querySelector('input[name="prompt"]');
@@ -21,8 +21,9 @@ const closeButton = document.getElementById('close');
 const showPromptButton = document.getElementById('show-prompts');
 const promptContainer = document.getElementById('super-container');
 let userInputMessage;
-let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || []; // Load chat history from local storage
-let currentChatIndex = -1
+let chatHistory; // Load chat history from local storage
+let currentChatIndex = -1;
+let messages = '';
 
 const divider = document.getElementById('vertical-divider');
 const chatContainer = document.getElementById('chat-container');
@@ -30,191 +31,196 @@ const historySideBar = document.getElementById('history-sidebar');
 const clearAllButton = document.getElementById('clear-all');
 const cancelButton = document.getElementById('cancel-button');
 
+
 let isDragging = false;
 let initialX;
 let initialWidth;
-
-let chatContainerWidth = parseInt(localStorage.getItem('chatContainerWidth')) || chatContainer.offsetWidth; 
-let messages = [];
+let chatContainerWidth;
 
 if (window.innerWidth >= 480) {
-
-// Apply the saved changes to the div size when loading
-chatContainer.style.width = `${chatContainerWidth}px`;
-historySideBar.style.width = `calc(100% - ${chatContainerWidth}px - 5px)`; 
-promptContainer.style.width = `calc(${chatContainerWidth}px - 5%)`;
-scrollButton.style.marginLeft = `calc(${chatContainerWidth}px/2 - 2%)`;
-
-
-divider.addEventListener('mousedown', (e) => {
-  isDragging = true;
-  initialX = e.clientX;
-  initialWidth = chatContainer.offsetWidth;
   
-});
-
-document.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
-
-  const parentWidth = chatContainer.parentElement.offsetWidth;
-
-  //Set the max width for chatMessages div
-  const minWidth = 0.2 * parentWidth;
-  const maxWidth = 0.9 * parentWidth;
-
-
-  const offsetX = e.clientX - initialX;
-  let newWidth = initialWidth - offsetX;
-
-  // Ensure newWidth does not go below 20% of parent width
-  if (newWidth < minWidth) {
-    newWidth = minWidth;
-  }
-
-  // Ensure newWidth does not go above the maxWidth
-  if (newWidth > maxWidth) {
-    newWidth = maxWidth;
-
-    // Change the buttons to images when maxWidth is reached
-    newChatButton.innerHTML = ''; // Clear existing text
-    newChatButton.innerHTML = '<img src="resources/images/newChatButton.png" alt="New Chat" style="width: 50%; height: auto;">';
-
-    clearHistoryButton.innerHTML = ''; // Clear existing text
-    clearHistoryButton.innerHTML = '<img src="resources/images/deleteChatButton.png" alt="Clear History" style="width: 50%; height: auto;">';
-  } else { // Change back to text if less than maxWidth
-    newChatButton.innerHTML = 'New Chat'; 
-
-    clearHistoryButton.innerHTML = 'Delete History'; 
-  }
-
-  // Update styles with the newWidth
-  chatContainer.style.width = `${newWidth}px`;
-  historySideBar.style.width = `calc(100% - ${newWidth}px - 5px)`; 
-  scrollButton.style.marginLeft = `calc(${newWidth}px / 2 - 2%)`; 
-  promptContainer.style.width = `calc(${newWidth}px - 5%)`;
-
-  // Save the new width to local storage
-  chatContainerWidth = newWidth;
-  localStorage.setItem('chatContainerWidth', chatContainerWidth); 
-  checkContainerWidth(newWidth);
-});
-
-document.addEventListener('mouseup', () => {
-  isDragging = false;
-});
-};
-
-  // Adjust divider for smaller screens
-if (window.innerWidth < 480) {
-    historySideBar.style.width = `100%`;
-    chatContainer.style.width = `100%`;
-    promptContainer.style.width = '80%';
-    divider.style.visibility = 'hidden';
+  divider.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    initialX = e.clientX;
+    initialWidth = chatContainer.offsetWidth;
     
-}
+  });
+  
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+  
+    const parentWidth = chatContainer.parentElement.offsetWidth;
+  
+    //Set the max width for chatMessages div
+    const minWidth = 0.2 * parentWidth;
+    const maxWidth = 0.9 * parentWidth;
+  
+  
+    const offsetX = e.clientX - initialX;
+    let newWidth = initialWidth - offsetX;
+  
+    // Ensure newWidth does not go below 20% of parent width
+    if (newWidth < minWidth) {
+      newWidth = minWidth;
+    }
+  
+    // Ensure newWidth does not go above the maxWidth
+    if (newWidth > maxWidth) {
+      newWidth = maxWidth;
+  
+      // Change the buttons to images when maxWidth is reached
+      newChatButton.innerHTML = ''; // Clear existing text
+      newChatButton.innerHTML = '<img src="resources/images/newChatButton.png" alt="New Chat" style="width: 50%; height: auto;">';
+  
+      clearHistoryButton.innerHTML = ''; // Clear existing text
+      clearHistoryButton.innerHTML = '<img src="resources/images/deleteChatButton.png" alt="Clear History" style="width: 50%; height: auto;">';
+    } else { // Change back to text if less than maxWidth
+      newChatButton.innerHTML = 'New Chat'; 
+  
+      clearHistoryButton.innerHTML = 'Delete History'; 
+    }
+  
+    // Update styles with the newWidth
+    chatContainer.style.width = `${newWidth}px`;
+    historySideBar.style.width = `calc(100% - ${newWidth}px - 5px)`; 
+    scrollButton.style.marginLeft = `calc(${newWidth}px / 2 - 2%)`; 
+    promptContainer.style.width = `calc(${newWidth}px - 5%)`;
+  
+    // Save the new width to local storage
+    chatContainerWidth = newWidth;
+    checkContainerWidth(newWidth);
+  });
+  
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+  };
+  
+    // Adjust divider for smaller screens
+  if (window.innerWidth < 480) {
+      historySideBar.style.width = `100%`;
+      chatContainer.style.width = `100%`;
+      promptContainer.style.width = '80%';
+      divider.style.visibility = 'hidden';
+      
+  }
+  
 
-// Create new chat and saving the previous chat to history
+// Function to start a new chat
 function startNewChat() {
-    // Show the prompts container for the new chat
-    showPrompts();
-    // Make the focus on the input field
-    userInputBox.focus();
-    // Clear the current chat messages and set the default message for new chat
-    chatMessages.innerHTML = `<div class="chatbot-message bot-message"><b>Dok: </b><br>Hello I am Dok! How can I assist you today? What would you like to ask?" </div>`;
-    // Create a new chat
+  // Show the prompts container for the new chat
+  showPrompts();
+  // Make the focus on the input field
+  userInputBox.focus();
+
+  const user = auth.currentUser;
+  if (!user) {
+    chatMessages.innerHTML = "Please sign in to start a new chat.";
+    return;
+  }
+
+    // Get the total number of chats in Firebase, dynamically calculate length
+    db.ref(`users/${user.uid}/chats`).once('value', (snapshot) => {
+      const newChatIndex = snapshot.numChildren();  // This gives the length of the chats in the database
+
+    const chats = snapshot.val();
+
     const newChat = {
-        id: Date.now(),
-        messages: [
-            { sender: "bot", message: "<b>Dok: </b><br>Hello I am Dok! How can I assist you today? What would you like to ask?" }
-        ]
+      sender: "bot",
+      message: "<b>Dok: </b><br>Hello I am Dok! How can I assist you today? What would you like to ask?"
     };
-  
-    // Add the new chat to chat history
-    chatHistory.push(newChat);
-  
-    // Save the updated chat history to local storage
-    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-    const index = chatHistory.length - 1; // Fix the index at creation time
-  
-    // Create a new chat tab in the history sidebar
+
+    // Save the new chat to the database
+    db.ref(`users/${user.uid}/chats/${newChatIndex}/messages`).push(newChat);
+
+    // Update the currentChatIndex
+    db.ref(`users/${user.uid}/currentChatIndex`).set(newChatIndex);
+
+    // Update the UI
+    userInputBox.focus();
+    chatMessages.innerHTML = `<div class="chatbot-message bot-message">${newChat.message}</div>`;
+
     const historyItem = document.createElement("a");
     historyItem.href = "#";
-    historyItem.innerText = `Chat ${chatHistory.length}`;
+    historyItem.innerHTML = `<strong>Chat ${newChatIndex + 1}</strong>`;
     historyItem.classList.add("history-item");
     historyItem.addEventListener("click", () => {
-      loadChat(index);
+      loadChat(newChatIndex);
       checkUserMessage();
       userInputBox.focus();
-  
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
     });
     historyContainer.appendChild(historyItem);
-  
-    // Set the current chat index to the newly created chat
-    currentChatIndex = chatHistory.length - 1;
-    
-    // Change color for the active chat in the history tab
-    updateActiveHistoryItem();
-    // Store the current chat index
-    localStorage.setItem('currentChatIndex', currentChatIndex); // Save index
-    // Load the current chat (the newly made one)
-    loadChat(currentChatIndex)
+    db.ref(`users/${user.uid}/chatIndex`).push(newChatIndex);
+
+    // Set and load the current chat
+    currentChatIndex = newChatIndex;
+    loadChat(currentChatIndex);
     historySideBar.scrollTop = historySideBar.scrollHeight;
+
+  });
+}
+
+// Function to load a chat by index
+function loadChat(index) {
+
+  const user = auth.currentUser;
+  if (!user) {
+    chatMessages.innerHTML = "Please sign in to load your chat history.";
+    return;
   }
-  
-  
-  // Display the selected chat from history
-  function loadChat(index) {
-  
-    currentChatIndex = index;
-    chatMessages.innerHTML = ""; // Clear current chat
-  
-    const selectedChat = chatHistory[currentChatIndex];
-    // Display all of the messages for the selected chat
-    selectedChat.messages.forEach(msg => {
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add(`${msg.sender}-message`);
-        const name = msg.sender === 'bot' ? '' : 'You: <br>';
-        messageDiv.innerHTML = `<b>${name} </b>` + msg.message;
-        chatMessages.appendChild(messageDiv);
 
-        const copyButton = document.createElement('button')
-        if (messageDiv.classList.contains('bot-message')) {
-        copyButton.classList.add('copy')
+  currentChatIndex = index; // Update current chat index
+  chatMessages.innerHTML = ""; // Clear current chat
 
+  const chatRef = db.ref(`users/${user.uid}/chats/${index}/messages`);
+
+  chatRef.on('value', (snapshot) => {
+    const messages = snapshot.val();
+    if (!messages) {
+      chatMessages.innerHTML = "No chat history available.";
+      return;
+    }
+
+    chatMessages.innerHTML = ""; // Clear existing chat messages
+
+    Object.values(messages).forEach((msg) => {
+      const messageDiv = document.createElement("div");
+      messageDiv.classList.add(`${msg.sender}-message`);
+      const name = msg.sender === "bot" ? "" : "You: <br>";
+      messageDiv.innerHTML = `<b>${name} </b>${msg.message}`;
+      chatMessages.appendChild(messageDiv);
+
+      if (msg.sender === "bot") {
+        const copyButton = document.createElement("button");
+        copyButton.classList.add("copy");
         messageDiv.append(copyButton);
-
-        copyButton.addEventListener('click', function(){
-          const parentText = this.parentElement.textContent;
-
-          let parentTextFormatted;
-          // Define the word or phrase to remove
-          const wordToRemove = "Dok: ";
-
-          // Remove the specific word or phrase using replace()
-          parentTextFormatted = parentText.replace(wordToRemove, '').trim();
-
-          navigator.clipboard.writeText(parentTextFormatted).then(() => {
-            this.classList.add('copied');
-            
-            setTimeout(() => {
-              this.classList.remove('copied');
-            }, 2000)
-
-          }).catch(err => {
-            console.error('Failed to copy text: ', err);
-        })
-      
+        copyButton.addEventListener("click", function () {
+          const parentText = this.parentElement.textContent.replace("Dok: ", "").trim();
+          navigator.clipboard
+            .writeText(parentText)
+            .then(() => {
+              this.classList.add("copied");
+              setTimeout(() => this.classList.remove("copied"), 2000);
+            })
+            .catch((err) => console.error("Failed to copy text: ", err));
         });
-        }
-    });
-    // Change color for the active chat in the sidebar (highlight the current chat)
-    updateActiveHistoryItem();
-  
-    // Scroll to the bottom of the chat container when loading the chat
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    localStorage.setItem('currentChatIndex', currentChatIndex); // Save index
-  }
-  
+      }
+    })
+    // Use setTimeout to ensure the scroll happens after rendering
+    setTimeout(() => {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }, 100); // Adjust timeout if needed
+    
+  });
+
+  updateActiveHistoryItem();
+  // Save the current chat index to the database
+  db.ref(`users/${user.uid}/currentChatIndex`).set(currentChatIndex);
+}
+
+
   // Change color for the active chat
   function updateActiveHistoryItem() {
     const allHistoryItems = document.querySelectorAll(".history-item");
@@ -232,6 +238,7 @@ function startNewChat() {
         activeItem.classList.add("active-chat");
     }
   }
+
 
 const showTypingEffect = (text, textElement, callback) => {
   // Split the words of the api response
@@ -300,28 +307,33 @@ const generateAPIResponse = async () => {
         // Reset the stop generating response to false
         stop = false;
 
-        // Refresh UI
+        // // Refresh UI
         refreshHistoryItem();
         updateActiveHistoryItem();
+        // refreshHistoryItem();
+        // updateActiveHistoryItem();
 
         // Formatted response of the current text in botResponseDiv
         const botResponse = botResponseDiv.innerHTML
         let formattedResponse;
-        formattedResponse = botResponse.replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 
+        formattedResponse = botResponse.replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        const user = auth.currentUser;
+        chatHistory = // Save the new chat to the database
+        db.ref(`users/${user.uid}/chats/${currentChatIndex}/messages`)
         // Save the formatted response to chat history
         const botMessageObj = { sender: "bot", message: botResponse };
-        chatHistory[currentChatIndex].messages.push(botMessageObj);
-        localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+        chatHistory.push(botMessageObj)
 
         // Scroll down
         chatContainer.scrollTop = chatContainer.scrollHeight;
 
         loadChat(currentChatIndex);
+        
+
       });
 
       // Scroll to the latest message
-      chatContainer.scrollTop = chatContainer.scrollHeight;
 
       // Remove "Generating..." message if the typing effect starts
       const generatingMessage = document.querySelector('.generating-message');
@@ -351,23 +363,33 @@ function sendMessage() {
     historyContainer.classList.add('disabled');
     newChatButton.classList.add('disabled');
     clearHistoryButton.classList.add('disabled');
-    sendButton.classList.add('disabled');
     stopButton.classList.remove('hidden');
     sendButton.classList.add('hidden');
     // Set the user input
     const userInput = promptInput.value;
     // Hide the prompts container when a message is sent
     hidePrompts();
+    const user = auth.currentUser;
+    chatHistory = // Save the new chat to the database
+    db.ref(`users/${user.uid}/chats/${currentChatIndex}/messages`)
 
     // Add the context of the current selected conversation to the bot
-    const selectedChat = chatHistory[currentChatIndex];
-        let tempContext;
-        selectedChat.messages.forEach(msg => {
-      
-          tempContext += msg.sender + ':' + msg.message;
-          messages = tempContext;
-          });
-    
+
+        // Add the context of the current selected conversation to the bot
+    chatHistory.on('value', (snapshot) => {
+      const context = snapshot.val();
+      let tempContext = '';  // Initialize tempContext as an empty string
+
+      // Loop through each message and concatenate it to tempContext
+      Object.values(context).forEach((msg) => {
+        tempContext += `${msg.sender}: ${msg.message}\n`;  // Append each message
+      });
+
+      // Now tempContext contains the full conversation
+      messages = tempContext;  // You can now assign this full context to messages
+      console.log(messages);  // Log the complete conversation context
+    });
+
     // Add the user input to the conversation div
     userInputMessage = promptInput.value
     output.innerHTML += `<div class='user-message'><b>You: </b><br>${userInput}</div>`
@@ -375,26 +397,105 @@ function sendMessage() {
     // Set the user message format and sender to save
     const userMessage = { sender: "user", message: userInput};
 
+    chatHistory.push(userMessage)
       //save the user input to current chat index history
-      chatHistory[currentChatIndex].messages.push(userMessage);
-      localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+      
       
       // Display "Generating..." below the user input before the typing effect is shown
       output.innerHTML += '<div class="generating-message">Dok is Thinking...</div>';
       // Scroll to the bottom of the selected chat
-      chatContainer.scrollTop = chatContainer.scrollHeight;
     // Call the generate response function
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
     generateAPIResponse();
     // Clear the input box
     promptInput.value = '';
 
 };
 
+  // Update the chat history view from the database
+function refreshHistoryItem() {
+  const user = auth.currentUser;
+  if (!user) {
+    console.error("User is not signed in. Cannot refresh chat history.");
+    return;
+  }
 
-// Function to delete individual chat history items
+  const userChatsRef = db.ref(`users/${user.uid}/chats`);
+
+  userChatsRef.once('value')
+    .then((snapshot) => {
+      const chats = snapshot.val();
+      historyContainer.innerHTML = ''; // Clear the history container before updating
+
+      if (!chats) {
+        console.log("No chats available to display in history.");
+        return;
+      }
+
+      Object.keys(chats).forEach((chatIndex) => {
+        const chat = chats[chatIndex];
+        const messages = chat.messages ? Object.values(chat.messages) : [];
+        const firstUserMessage = messages.find(msg => msg.sender === "user")?.message || '';
+
+        const historyItem = document.createElement("a");
+        historyItem.innerHTML = firstUserMessage
+          ? `<strong>Chat ${parseInt(chatIndex, 10) + 1}</strong>: ${firstUserMessage}`
+          : `<strong>Chat ${parseInt(chatIndex, 10) + 1}</strong>`;
+
+        historyItem.href = "#";
+        historyItem.classList.add("history-item");
+
+        // Add click event to load the chat when clicked
+        historyItem.addEventListener("click", () => {
+          loadChat(chatIndex);
+          checkUserMessage();
+          userInputBox.focus();        
+        });
+
+        historyContainer.appendChild(historyItem); // Append to the history container
+        loadChat(currentChatIndex);
+      });
+    })
+    .catch((error) => {
+      console.error("Failed to refresh chat history:", error);
+    });
+}
+
+// Load the chat history and initialize the UI
+function loadHistory() {
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      // User is signed in, proceed to load chat history
+
+      db.ref(`users/${user.uid}/currentChatIndex`).once('value')
+      .then((snapshot) => {
+        currentChatIndex = snapshot.val();
+        refreshHistoryItem();
+
+        loadChat(currentChatIndex);
+      })
+      return db.ref(`users/${user.uid}/chats`).once('value')
+        .then((snapshot) => {
+          const totalChats = snapshot.numChildren(); // This gives the length of the chats in the database
+          if (totalChats === 0) {
+            startNewChat();
+          }
+        })
+
+
+    } else {
+      // User is not signed in, clear the history and show a message
+      historyContainer.innerHTML = '';
+      chatMessages.innerHTML = "Please sign in to view your chat history.";
+      console.error("User is not signed in.");
+    }
+  });
+}
 function clearChatHistory() {
-  
-  // Tell to the user to select a history item to delete
+  const user = auth.currentUser;
+
+  // Tell the user to select a history item to delete
   const instruction = document.createElement('div');
   instruction.classList.add('instruction');
   instruction.innerText = 'Click on a chat history item to delete it or press Cancel to exit.';
@@ -402,52 +503,53 @@ function clearChatHistory() {
 
   // Update the UI, hide and show the buttons
   cancelButton.classList.remove('hidden');
-  clearHistoryButton.classList.add('hidden')
+  clearHistoryButton.classList.add('hidden');
   clearAllButton.classList.remove('hidden');
 
   // Record the currentChatIndex when clearHistoryButton is pressed
-  let previousChatIndex = currentChatIndex
+  let previousChatIndex = currentChatIndex;
+
   // Add click event listeners to history items for deletion when in clear mode
   const allHistoryItems = document.querySelectorAll('.history-item');
   allHistoryItems.forEach((historyItem, index) => {
-      historyItem.classList.add('deletable')
+    historyItem.classList.add('deletable');
 
-      historyItem.addEventListener('click', function deleteHistoryItem() {
+    historyItem.addEventListener('click', function deleteHistoryItem() {
+      const chatsRef = db.ref(`users/${user.uid}/chats`);
 
-          // Remove selected chat from chatHistory array
-          chatHistory.splice(index, 1);
+      // Remove the chat and reorder remaining chats
+      deleteChatAndReorder(chatsRef, index)
+        .then(() => {
+          return db.ref(`users/${user.uid}/chats`).once('value');
+        })
+        .then((snapshot) => {
+          const totalChats = snapshot.numChildren(); // This gives the length of the chats in the database
 
-          // Update the local storage with the new chat history
-          localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-            
           // Update currentChatIndex based on the relative position of the deleted chat
-      if (previousChatIndex === index) { // Update the currentChatIndex if the deleted chat is the selected chat
- 
-        if (previousChatIndex > chatHistory.length -1 ){
-          currentChatIndex = chatHistory.length-1; // Make sure that the max currentChatIndex does not go more than the chatHistory length
+          if (previousChatIndex === index) {
+            if (previousChatIndex > totalChats) {
+              currentChatIndex = totalChats - 1; // Ensure max currentChatIndex does not exceed totalChats - 1
+            } else {
+              currentChatIndex = previousChatIndex;
+            }
+          } else if (previousChatIndex < index) {
+            currentChatIndex = previousChatIndex; // No change if the deleted chat is after the selected one
+          } else {
+            currentChatIndex = previousChatIndex - 1; // Adjust index if the deleted chat was before
+          }
 
-        } else if (previousChatIndex <= chatHistory.length -1){ // No update if the current chat is deleted, but does not go more than the chatHistory length
-          currentChatIndex = previousChatIndex;
-        }
-      
-      } else if (previousChatIndex < index) { // No change if the deleted chat is more than the previous chat index
-        currentChatIndex = previousChatIndex; 
-      } else if (previousChatIndex > index) { // Update all the chat index so that it subtracts by 1 if the deleted chat is before the current chat index
-        currentChatIndex--; 
-        currentChatIndex = previousChatIndex - 1
-      }
+          if (currentChatIndex < 0) {
+            currentChatIndex = 0
+          }
+          
 
-      if (chatHistory.length === 0) { // Automatically start a new chat if after deleting, there is no chat history
-        startNewChat();        
-      }
           // Update the UI
           loadChat(currentChatIndex);
-          checkUserMessage();
           refreshHistoryItem();
           updateActiveHistoryItem();
 
-          // Store the currentChatIndex
-          localStorage.setItem('currentChatIndex', currentChatIndex);
+          // Store the updated currentChatIndex in the database
+          db.ref(`users/${user.uid}/currentChatIndex`).set(currentChatIndex);
 
           // Remove instruction and cancel button, re-enable the button
           instruction.remove();
@@ -456,274 +558,277 @@ function clearChatHistory() {
 
           // Remove the delete chat event listener from the history items after the item is deleted
           historyItem.removeEventListener('click', deleteHistoryItem);
-          clearHistoryButton.classList.remove('hidden')
-          historyItem.classList.remove('deletable')
+          clearHistoryButton.classList.remove('hidden');
+          historyItem.classList.remove('deletable');
 
-
-      });
-  });
-
-  // Add event listener to the cancel button
-  cancelButton.addEventListener('click', function cancelDeletionMode() {
-      // Remove instruction and cancel button
-      instruction.remove();
-      cancelButton.classList.add('hidden');
-      clearHistoryButton.classList.remove('hidden')
-      clearAllButton.classList.add('hidden');
-
-      //Update the UI
-      loadChat(currentChatIndex);
-      refreshHistoryItem();
-      updateActiveHistoryItem();
-
-
-      // Remove the click event listeners from history items
-      allHistoryItems.forEach((historyItem) => {
-          historyItem.replaceWith(historyItem.cloneNode(true)); // Clone and replace to remove listeners
-          historyItem.classList.remove('deletable')
-      });
-  });
-}
-
-// Delete all the chat history
-function clearAllHistory() {
-  // Clear chat messages from the chat message div
-  chatMessages.innerHTML = `<div class="chatbot-message bot-message">No history available. Start a new chat!</div>`;
-  
-  // Clear history from the local storage
-  chatHistory = [];
-  localStorage.removeItem('chatHistory');
-  localStorage.removeItem('currentChatIndex');
-
-  // Remove all chat history tab from the sidebar
-  historyContainer.innerHTML = '';
-  
-  // Update the UI by starting a new chat
-  startNewChat();
-  checkUserMessage();
-
-  // Hide and Show the buttons
-  cancelButton.classList.add('hidden');
-  clearAllButton.classList.add('hidden');
-  clearHistoryButton.classList.remove('hidden');
-
-}
-
-    
-  // Update the chat history view
-  function refreshHistoryItem() {
-    historyContainer.innerHTML = ''; // Clear the history container before updating
-    
-    chatHistory.forEach((chat, index) => { // Update the writings on the chat history items
-      const historyItem = document.createElement("a");
-      const firstUserMessage = chat.messages.find(msg => msg.sender === "user")?.message || '';
-      if (firstUserMessage === ''){
-        historyItem.innerHTML = `<strong>Chat ${index + 1}</strong>`
-      } else {
-        historyItem.innerHTML = `<strong>Chat ${index + 1}</strong>: ${firstUserMessage}`;
-      }
-  
-      historyItem.href = "#";
-      historyItem.classList.add("history-item");
-  
-      // Update the history item click event
-      historyItem.addEventListener("click", () => {
-        loadChat(index);
-        checkUserMessage();
-        userInputBox.focus();
-  
-      });
-      historyContainer.appendChild(historyItem); // Append to the history container
+        })
+        .then(() => {
+          refreshHistoryItem();
+        })
+        
+        
+        .catch((error) => {
+          console.error('Error deleting chat or updating index:', error);
+        });
     });
-  }
-  
-  // Load the Chat history
-    function loadHistory() {
-      
-      promptInput.focus(); // Set focus back to the input field
-  
-      // Check if chat history exists in local storage
-      if (!Array.isArray(chatHistory)) {
-          localStorage.removeItem('chatHistory');
-          chatHistory = [];
-      }
-      // Automatically start a new chat if there is no chat when loading the chatbot
-      if (!Array.isArray(chatHistory) || chatHistory.length === 0) {
-          startNewChat();
-      } else{
-      
-        // Update the chat history items
-      refreshHistoryItem();
-      const savedChatIndex = localStorage.getItem('currentChatIndex');
-      
-      if (savedChatIndex !== null) {
-          currentChatIndex = parseInt(savedChatIndex, 10);
-          loadChat(currentChatIndex); // Automatically load the saved chat
-      }
-      }
-      }
-  
-  // Check whether the send function should be available
-  function disableSend(){
-    // Disable the send button by default (no input)
-  sendButton.classList.add('disabled');
-        // Event listener for send button click
-  sendButton.addEventListener('click', (ev) => {
-    ev.preventDefault();
-    sendMessage(ev); // Pass ev to sendMessage
-    });
-      
-  // Event listener for Enter key press in the input field
-  promptInput.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter') {
-      if (promptInput.value.trim() !== '') {
-  
-      ev.preventDefault(); 
-      sendMessage(ev);
-    }}
-  });
-  }
-  // Prevent empty prompts by detecting input from the input box
-  userInputBox.addEventListener('input', () => {
-    if (promptInput.value.trim() !== ''){
-      sendButton.classList.remove('disabled'); // Enable the send button if there is input
-    } else {
-      sendButton.classList.add('disabled'); // Disable the send button if there is no input
+  })
+  .then(() => {
+    if (totalChats <= 0) {
+      startNewChat();
     }
   })
   
-  stopButton.addEventListener('click', () => { // Add event listener for the stop button
-    stop = true;
-    userInputBox.focus();
-  }
-  );
-  
-  
-  
-  function isScrolledToBottom() { // Checks if the current chat is scrolled to the bottom
-    return chatContainer.scrollTop + chatContainer.clientHeight >= chatContainer.scrollHeight - 100;
-  }
-  
-  let checkScrollInterval
-  
-  function checkScroll() { // Continuously check whether the current chat is scrolled to the bottom
-  checkScrollInterval = setInterval(() => {
-    if (isScrolledToBottom()) {
-      // Hide the scroll button if scrolled to the bottom
-      scrollButton.classList.add('hidden');
-    } else {
-      // Show the scroll button if not at the bottom
-      scrollButton.classList.remove('hidden');
-    }
-  }, 100);
-  }
-  
-  
-  // Event listener for scroll events
-  chatContainer.addEventListener('scroll', () => {
-    if (isScrolledToBottom()) {
-      scrollButton.classList.add('hidden'); // Hide button if at bottom
-    } else {
-      scrollButton.classList.remove('hidden'); // Show button if not at bottom
-    }
-  });
-  
-  // Scrolls the current chat to the bottom when clicked
-  scrollButton.addEventListener('click', () => {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-  }
-  );
-  
-  // Event listener for new chat button
-  newChatButton.addEventListener("click", startNewChat);
-  // Event listener for clear history button
-  clearHistoryButton.addEventListener("click", clearChatHistory);
-  // Event listener for clear all button
-  clearAllButton.addEventListener('click', clearAllHistory)
-  // Check whether to show prompt based on the input
-  function checkUserMessage(){
-    let hasUserMessage = false;
-    // Shows if there is an existing user message in the current selected chat
-    if (currentChatIndex !== -1 && chatHistory[currentChatIndex]) {
-      hasUserMessage = chatHistory[currentChatIndex].messages.some(
-        message => message.sender === "user"
-      );
-    }
-  
-    // Show prompts if there are no user messages in the current chat
-    if (!hasUserMessage) {
-      showPrompts();
-    } else { // Hide it otherwise
-      hidePrompts();
+  // Add event listener to the cancel button
+  cancelButton.addEventListener('click', function cancelDeletionMode() {
+    // Remove instruction and cancel button
+    instruction.remove();
+    cancelButton.classList.add('hidden');
+    clearHistoryButton.classList.remove('hidden')
+    clearAllButton.classList.add('hidden');
+    
+    //Update the UI
+    loadChat(currentChatIndex);
 
-    }
-  }
-  
-  // Hide the prompt if the chat message container is too small
-  function checkContainerWidth(width){
-    if (width < 550) {
-      hidePrompts();
-      showPromptButton.classList.add('hidden')
-    } else {
-      checkUserMessage();
-      showPromptButton.classList.remove('hidden');
-    }
-  
-  };  
+    refreshHistoryItem();
+    updateActiveHistoryItem();
 
-  // Hide the prompt and edit the show prompt button text
-  function hidePrompts(){
-    promptContainer.classList.add('invisible');
-    showPromptButton.innerHTML = '?'
-  };
-    // Show the prompt and edit the show prompt button text
-  function showPrompts(){
-    promptContainer.classList.remove('invisible');
-    showPromptButton.classList.remove('hidden')
-    showPromptButton.innerHTML = 'X';
-  };
-  // Puts the selected prompt inside the input box
-  function insertPrompts(prompt){
-    userInputBox.value = prompt.textContent;
-  };
-  // Close the prompt container
-  closeButton.addEventListener('click', () => {
-    hidePrompts();
-  });
-  
-  // Show prompt button event listener
-  showPromptButton.addEventListener('click', () => {
-    if (showPromptButton.textContent === 'X') {
-      hidePrompts(); // Hide prompts if the text is 'X'
-    } else {
-      showPrompts(); // Show the prompts if the text is '?'
-    }
+
+    // Remove the click event listeners from history items
+    allHistoryItems.forEach((historyItem) => {
+        historyItem.replaceWith(historyItem.cloneNode(true)); // Clone and replace to remove listeners
+        historyItem.classList.remove('deletable')
     });
+});
+}
+
+
+
+// Helper function to delete a chat and reorder the remaining chats
+function deleteChatAndReorder(chatsRef, index) {
+  return chatsRef.once('value').then((snapshot) => {
+    const chats = snapshot.val(); // Retrieve all chats as an object
+    const updatedChats = {};
+
+    // Rebuild the chats object with updated indices
+    let newIndex = 0;
+    Object.keys(chats).forEach((key) => {
+      if (parseInt(key, 10) !== index) {
+        updatedChats[newIndex] = chats[key];
+        newIndex++;
+      }
+    });
+
+    // Replace the entire chats node with the updated chats object
+    return chatsRef.set(updatedChats);
+  });
+}
+
   
-  // prompt 1 button event listener
-  prompt1Button.addEventListener('click', () => {
-    insertPrompts(prompt1Button); // put prompt 1 in input box
-    sendButton.classList.remove('disabled'); // Enable the send button
-    userInputBox.focus(); // Focus on the input box
-  });
-  // prompt 2 button event listener
-  prompt2Button.addEventListener('click', () => {
-    insertPrompts(prompt2Button); // put prompt 2 in input box
-    sendButton.classList.remove('disabled'); // Enable the send button
-    userInputBox.focus(); // Focus on the input box
-  });
-  // prompt 3 button event listener
-  prompt3Button.addEventListener('click', () => {
-    insertPrompts(prompt3Button); // put prompt 3 in input box
-    sendButton.classList.remove('disabled'); // Enable the send button
-    userInputBox.focus(); // Focus on the input box
-  });
+function clearAllHistory() {
+  const user = firebase.auth().currentUser;
+    
+    if (user) {
   
-  // Check the message container width to decide whether to show prompt
-  checkContainerWidth(chatContainerWidth);
-  // Check if the selected chat is scrolled to the bottom
-  checkScroll();
-  // Load history when the page is loaded
-  loadHistory();
-  // Check whether send should be enabled or not
-  disableSend();  
+      // Delete user data from the database first
+      db.ref(`users/${user.uid}/chats`).remove();
+      db.ref(`users/${user.uid}/currentChatIndex`).remove();
+
+
+      historyContainer.innerHTML = '';
+      startNewChat()
+
+      // Hide and Show the buttons
+      cancelButton.classList.add('hidden');
+      clearAllButton.classList.add('hidden');
+      clearHistoryButton.classList.remove('hidden');
+
+        
+    } else {
+      console.log('No History');
+    }
+}
+
+// Check whether the send function should be available
+function disableSend(){
+  // Disable the send button by default (no input)
+sendButton.classList.add('disabled');
+      // Event listener for send button click
+sendButton.addEventListener('click', (ev) => {
+  ev.preventDefault();
+  sendMessage(ev); // Pass ev to sendMessage
+  });
+    
+// Event listener for Enter key press in the input field
+promptInput.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Enter') {
+    if (promptInput.value.trim() !== '') {
+
+    ev.preventDefault(); 
+    sendMessage(ev);
+  }}
+});
+}
+// Prevent empty prompts by detecting input from the input box
+userInputBox.addEventListener('input', () => {
+  if (promptInput.value.trim() !== ''){
+    sendButton.classList.remove('disabled'); // Enable the send button if there is input
+  } else {
+    sendButton.classList.add('disabled'); // Disable the send button if there is no input
+  }
+})
+
+stopButton.addEventListener('click', () => { // Add event listener for the stop button
+  stop = true;
+  userInputBox.focus();
+}
+);
+
+
+
+function isScrolledToBottom() { // Checks if the current chat is scrolled to the bottom
+  return chatContainer.scrollTop + chatContainer.clientHeight >= chatContainer.scrollHeight - 100;
+}
+
+let checkScrollInterval
+
+function checkScroll() { // Continuously check whether the current chat is scrolled to the bottom
+checkScrollInterval = setInterval(() => {
+  if (isScrolledToBottom()) {
+    // Hide the scroll button if scrolled to the bottom
+    scrollButton.classList.add('hidden');
+  } else {
+    // Show the scroll button if not at the bottom
+    scrollButton.classList.remove('hidden');
+  }
+}, 100);
+}
+
+function checkUserMessage() {
+  const user = auth.currentUser;
+  if (!user) {
+    console.error("User is not signed in.");
+    return;
+  }
+
+  const userChatsRef = db.ref(`users/${user.uid}/chats/${currentChatIndex}/messages`);
+  
+  // Check if there are user messages
+  userChatsRef.once('value')
+    .then((snapshot) => {
+      const messages = snapshot.val();
+      let hasUserMessage = false;
+
+      if (messages && Object.keys(messages).length > 0) {
+        // Check if any message is from the user
+        hasUserMessage = Object.values(messages).some(
+          (message) => message.sender === "user"
+        );
+      } else {
+        console.log("The messages are empty.");
+      }
+
+      // Show or hide prompts based on the result
+      if (!hasUserMessage) {
+        showPrompts();
+      } else {
+        hidePrompts();
+      }
+    })
+    .catch((error) => {
+      console.error("Error reading messages:", error);
+    });
+}
+
+
+
+
+// Event listener for scroll events
+chatContainer.addEventListener('scroll', () => {
+  if (isScrolledToBottom()) {
+    scrollButton.classList.add('hidden'); // Hide button if at bottom
+  } else {
+    scrollButton.classList.remove('hidden'); // Show button if not at bottom
+  }
+});
+
+// Scrolls the current chat to the bottom when clicked
+scrollButton.addEventListener('click', () => {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+);
+
+// Event listener for new chat button
+newChatButton.addEventListener("click", startNewChat);
+// Event listener for clear history button
+clearHistoryButton.addEventListener("click", clearChatHistory);
+// Event listener for clear all button
+clearAllButton.addEventListener('click', clearAllHistory)
+// Check whether to show prompt based on the input
+
+// Hide the prompt if the chat message container is too small
+function checkContainerWidth(width){
+  if (width < 550) {
+    hidePrompts();
+    showPromptButton.classList.add('hidden')
+  } else {
+    showPromptButton.classList.remove('hidden');
+  }
+
+};  
+
+// Hide the prompt and edit the show prompt button text
+function hidePrompts(){
+  promptContainer.classList.add('invisible');
+  showPromptButton.innerHTML = '?'
+};
+  // Show the prompt and edit the show prompt button text
+function showPrompts(){
+  promptContainer.classList.remove('invisible');
+  showPromptButton.classList.remove('hidden')
+  showPromptButton.innerHTML = 'X';
+};
+// Puts the selected prompt inside the input box
+function insertPrompts(prompt){
+  userInputBox.value = prompt.textContent;
+};
+// Close the prompt container
+closeButton.addEventListener('click', () => {
+  hidePrompts();
+});
+
+// Show prompt button event listener
+showPromptButton.addEventListener('click', () => {
+  if (showPromptButton.textContent === 'X') {
+    hidePrompts(); // Hide prompts if the text is 'X'
+  } else {
+    showPrompts(); // Show the prompts if the text is '?'
+  }
+  });
+
+// prompt 1 button event listener
+prompt1Button.addEventListener('click', () => {
+  insertPrompts(prompt1Button); // put prompt 1 in input box
+  sendButton.classList.remove('disabled'); // Enable the send button
+  userInputBox.focus(); // Focus on the input box
+});
+// prompt 2 button event listener
+prompt2Button.addEventListener('click', () => {
+  insertPrompts(prompt2Button); // put prompt 2 in input box
+  sendButton.classList.remove('disabled'); // Enable the send button
+  userInputBox.focus(); // Focus on the input box
+});
+// prompt 3 button event listener
+prompt3Button.addEventListener('click', () => {
+  insertPrompts(prompt3Button); // put prompt 3 in input box
+  sendButton.classList.remove('disabled'); // Enable the send button
+  userInputBox.focus(); // Focus on the input box
+});
+
+// Check the message container width to decide whether to show prompt
+checkContainerWidth(chatContainerWidth);
+// Check if the selected chat is scrolled to the bottom
+checkScroll();
+// Load history when the page is loaded
+loadHistory();
+// Check whether send should be enabled or not
+disableSend();  
