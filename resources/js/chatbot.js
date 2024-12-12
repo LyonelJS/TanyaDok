@@ -530,7 +530,7 @@ function clearChatHistory() {
             if (previousChatIndex > totalChats) {
               currentChatIndex = totalChats - 1; // Ensure max currentChatIndex does not exceed totalChats - 1
             } else {
-              currentChatIndex = previousChatIndex;
+              currentChatIndex = previousChatIndex -1 ;
             }
           } else if (previousChatIndex < index) {
             currentChatIndex = previousChatIndex; // No change if the deleted chat is after the selected one
@@ -540,6 +540,12 @@ function clearChatHistory() {
 
           if (currentChatIndex < 0) {
             currentChatIndex = 0
+            if (totalChats === 0) {
+              setTimeout(() => {
+                startNewChat();
+              }, 300); // Adjust timeout if needed
+              
+            }
           }
           
 
@@ -571,11 +577,6 @@ function clearChatHistory() {
           console.error('Error deleting chat or updating index:', error);
         });
     });
-  })
-  .then(() => {
-    if (totalChats <= 0) {
-      startNewChat();
-    }
   })
   
   // Add event listener to the cancel button
