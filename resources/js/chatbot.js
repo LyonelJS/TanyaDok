@@ -175,6 +175,8 @@ function loadChat(index) {
   chatMessages.innerHTML = ""; // Clear current chat
 
   const chatRef = db.ref(`users/${user.uid}/chats/${index}/messages`);
+  // Replace non-alphanumeric characters in the email for database path usage
+  const userEmailKey = user.email.replace(/[^a-zA-Z0-9]/g, ',');
 
   chatRef.on('value', (snapshot) => {
     const messages = snapshot.val();
@@ -186,11 +188,34 @@ function loadChat(index) {
     chatMessages.innerHTML = ""; // Clear existing chat messages
 
     Object.values(messages).forEach((msg) => {
+      const chat = document.createElement('div');
+      chat.classList.add(`${msg.sender}-chat`);
+      const profile = document.createElement('div');
+      profile.classList.add(`${msg.sender}-profile`);
       const messageDiv = document.createElement("div");
       messageDiv.classList.add(`${msg.sender}-message`);
       const name = msg.sender === "bot" ? "" : "You: <br>";
       messageDiv.innerHTML = `<b>${name} </b>${msg.message}`;
-      chatMessages.appendChild(messageDiv);
+      if (msg.sender === 'bot') {
+        chat.appendChild(profile);
+        chat.appendChild(messageDiv);
+        
+      } else {
+        chat.appendChild(messageDiv);
+        chat.appendChild(profile);
+        // Fetch user data from the database
+        db.ref(`users/${userEmailKey}/profilePicture`).once('value').then(snapshot => {
+          const profilePicture = snapshot.val();
+          
+          profile.style.backgroundImage = `url(${profilePicture})`;
+          profile.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
+          profile.style.backgroundPosition = 'center'; // Optional: center the image
+          profile.style.backgroundRepeat = 'no-repeat'; // Optional: prevent image repetition    });
+        });
+          }
+      
+      chatMessages.appendChild(chat);
+      
 
       if (msg.sender === "bot") {
         const copyButton = document.createElement("button");
@@ -242,6 +267,11 @@ function loadChat(index) {
 
 const showTypingEffect = (text, textElement, callback) => {
   // Split the words of the api response
+  const generatingMessage = document.querySelector('.generating-message');
+      if (generatingMessage) {
+          generatingMessage.remove();
+      }
+
   const words = text.split(' ');
   let currentWordIndex = 0;
   // Set the time between each word generation
@@ -285,13 +315,18 @@ const generateAPIResponse = async () => {
       const apiResponse = formatResponseText(
           data?.candidates[0].content.parts[0].text
       );
-
+      const botChat = document.createElement('div');
+      botChat.classList.add('bot-chat');
+      const botProfile = document.createElement('div');
+      botProfile.classList.add('bot-profile');
       // Create a container for the bot response
       const botResponseDiv = document.createElement('div');
-      botResponseDiv.classList.add('bot-message', 'bot-message-right');
+      botResponseDiv.classList.add('bot-message');
+      botChat.appendChild(botProfile);
+      botChat.appendChild(botResponseDiv)
       
       // Append the container to the output div
-      output.appendChild(botResponseDiv);
+      output.appendChild(botChat);
       // Add the 'Dok: '(sender) text to the container
       botResponseDiv.innerHTML += `<b>Dok: </b><br>`;
 
@@ -304,6 +339,7 @@ const generateAPIResponse = async () => {
         clearHistoryButton.classList.remove('disabled');
         stopButton.classList.add('hidden');
         sendButton.classList.remove('hidden');
+        sendButton.classList.add('disabled');
         // Reset the stop generating response to false
         stop = false;
 
@@ -333,14 +369,8 @@ const generateAPIResponse = async () => {
 
       });
 
-      // Scroll to the latest message
-
       // Remove "Generating..." message if the typing effect starts
-      const generatingMessage = document.querySelector('.generating-message');
-      if (generatingMessage) {
-          generatingMessage.remove();
-      }
-
+      
       
   } catch (error) {
       console.error(error);
@@ -369,9 +399,12 @@ function sendMessage() {
     const userInput = promptInput.value;
     // Hide the prompts container when a message is sent
     hidePrompts();
+
     const user = auth.currentUser;
     chatHistory = // Save the new chat to the database
     db.ref(`users/${user.uid}/chats/${currentChatIndex}/messages`)
+
+    const userEmailKey = user.email.replace(/[^a-zA-Z0-9]/g, ',');
 
     // Add the context of the current selected conversation to the bot
 
@@ -392,26 +425,46 @@ function sendMessage() {
 
     // Add the user input to the conversation div
     userInputMessage = promptInput.value
-    output.innerHTML += `<div class='user-message'><b>You: </b><br>${userInput}</div>`
+    // Fetch user data from the database
+    const generatingMessage = document.createElement('div');
+    generatingMessage.innerHTML = 'Dok is Thinking...';
+    generatingMessage.classList.add('generating-message');
+    const userChat = document.createElement('div');
+    userChat.classList.add('user-chat');
+    const userProfile = document.createElement('div');
+    userProfile.classList.add('user-profile');
+    db.ref(`users/${userEmailKey}/profilePicture`).once('value').then(snapshot => {
+      const profilePicture = snapshot.val();
+      
+      userProfile.style.backgroundImage = `url(${profilePicture})`;
+      userProfile.style.backgroundSize = 'cover'; // Optional: make sure the image covers the element
+      userProfile.style.backgroundPosition = 'center'; // Optional: center the image
+      userProfile.style.backgroundRepeat = 'no-repeat'; // Optional: prevent image repetition    });
+    })
+    .then(() => {
+      userChat.innerHTML += `<div class='user-message'><b>You: </b><br>${userInput}</div>`;
+      userChat.appendChild(userProfile);
+      output.appendChild(userChat);
     
     // Set the user message format and sender to save
-    const userMessage = { sender: "user", message: userInput};
+      const userMessage = { sender: "user", message: userInput};
 
-    chatHistory.push(userMessage)
+      chatHistory.push(userMessage);
       //save the user input to current chat index history
       
       
       // Display "Generating..." below the user input before the typing effect is shown
-      output.innerHTML += '<div class="generating-message">Dok is Thinking...</div>';
+      output.appendChild(generatingMessage);
       // Scroll to the bottom of the selected chat
     // Call the generate response function
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+      chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    generateAPIResponse();
+      generateAPIResponse();
     // Clear the input box
-    promptInput.value = '';
-
-};
+      promptInput.value = '';
+  
+    })
+}
 
   // Update the chat history view from the database
 function refreshHistoryItem() {
