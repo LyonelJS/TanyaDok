@@ -526,10 +526,7 @@ body {
         width:100%;
     }
     #close{
-        margin-bottom:40%;
-        position:absolute;
-        height:2%;
-        margin-left:85%;
+        display: none;
     }
     @media (max-height: 800px) {
         .super-container{
