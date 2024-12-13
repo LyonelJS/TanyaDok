@@ -369,8 +369,9 @@ const generateAPIResponse = async () => {
 
       });
 
-      // Remove "Generating..." message if the typing effect starts
-      
+      // Scroll to the bottom
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
       
   } catch (error) {
       console.error(error);
