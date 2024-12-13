@@ -208,9 +208,11 @@
       margin-top:0px !important;
 
     }
-    #birthdate{
-        width:100%;
-      }
+   input[type="date"] {
+  appearance: none; /* For cross-browser consistency */
+  -webkit-appearance: none; /* For WebKit-based browsers like Chrome and Safari */
+  -moz-appearance: none; /* For Firefox */
+}
 
     /* Responsive Design */
     @media (max-width: 768px) {
